@@ -11,7 +11,11 @@ module.exports = function AutoHeal(dispatch) {
         playerLocation = {},
         partyMembers = [],
         job = -1,
-        glyphs = null;
+        glyphs = null,
+		ownX = null,
+        ownY = null,
+        ownZ = null,
+		bossInfo = [];
     
     command.add('autoheal', (p1)=> {
         if (p1 == null) {
@@ -62,11 +66,34 @@ module.exports = function AutoHeal(dispatch) {
         command.message('Casting ' + (config.autoCast ? 'enabled' : 'disabled'));
     });
     
+	
+    command.add('testparty', () => {
+        sortHp();
+        message(JSON.stringify(partyMembers, null, 4));
+    });
+	command.add('testboss', () => {
+        sortDistBoss();
+        message(JSON.stringify(bossInfo, null, 4));
+    });
+	command.add('clearboss', () => {
+        bossInfo = [];
+        message(JSON.stringify(bossInfo, null, 4));
+    });
+	command.add('testenabled', () => {
+        message(enabled);
+    });
+	
     dispatch.hook('S_LOGIN', 10, (event) => {
         playerId = event.playerId;
         gameId = event.gameId;
         job = (event.templateId - 10101) % 100;
-        enabled = (config.Skills[job]) ? true : false;
+        //enabled = (config.Skills[job]) ? true : false;
+		if ((job == 4) || (job == 5) || (job == 6) || (job == 7)){ // sorc or archer or priest or mystic
+			enabled = true;
+		} else {
+			enabled = false;
+		}
+		
     })
        
     dispatch.hook('S_PARTY_MEMBER_LIST', 7, (event) => {
@@ -94,11 +121,15 @@ module.exports = function AutoHeal(dispatch) {
     
     dispatch.hook('S_LEAVE_PARTY', 1, (event) => {
         partyMembers = [];
+		bossInfo = [];
     })
     
     dispatch.hook('C_PLAYER_LOCATION', 5, (event) => {
         if (!enabled) return;
         playerLocation = event;
+		ownX = (event.loc.x + event.dest.x) / 2;
+        ownY = (event.loc.y + event.dest.y) / 2;
+        ownZ = (event.loc.z + event.dest.z) / 2;
     })
     
     dispatch.hook('S_SPAWN_ME', 3, (event) => {
@@ -213,16 +244,73 @@ module.exports = function AutoHeal(dispatch) {
         }
     });    
     
+	
+	dispatch.hook('S_BOSS_GAGE_INFO', 3, { order: -10 }, (event) => {
+
+        let alreadyHaveBoss = false;
+        let tempPushEvent = {
+            id: event.id,
+            x: 99999999,
+            y: 99999999,
+            z: 99999999,
+            w: null,
+            hp: Math.round(event.curHp / event.maxHp * 100),
+            dist: 100
+        }
+        if (bossInfo.length <= 0) {
+            bossInfo.push(tempPushEvent);
+        } else {
+            for (let b = 0; b < bossInfo.length; b++) {
+                if (bossInfo[b].id.equals(event.id)) {
+                    bossInfo[b].hp = Math.round(event.curHp / event.maxHp * 100);
+                    alreadyHaveBoss = true;
+                    if (event.curHp <= 0) {
+                        bossInfo = bossInfo.filter(function (p) {
+                            return !p.id.equals(event.id);
+                        });
+                    }
+                    break;
+                }
+            }
+            if (alreadyHaveBoss == false) {
+                bossInfo.push(tempPushEvent);
+            }
+        }
+
+    });
+// was 4
+// use 8 once patch 75
+    dispatch.hook('S_ACTION_STAGE', 7, { order: -10 }, (event) => {
+
+        if (bossInfo.length <= 0) return;
+        for (let b = 0; b < bossInfo.length; b++) {
+            if (event.gameId.equals(bossInfo[b].id)) {
+                bossInfo[b].x = event.loc.x;
+                bossInfo[b].y = event.loc.y;
+                bossInfo[b].z = event.loc.z;
+                bossInfo[b].w = event.w;
+                bossInfo[b].dist = checkDistance(ownX, ownY, ownZ, event.loc.x, event.loc.y, event.loc.z);
+                break;
+            }
+        }
+
+    });
+	
     dispatch.hook('C_START_SKILL', 7, (event) => {
         if (!enabled) return;
-        if (partyMembers.length == 0) return; // be in a party
+        // if (partyMembers.length == 0) return; // be in a party
         if (event.skill.id / 10 & 1 != 0) { // is casting (opposed to locking on)
             playerLocation.w = event.w;
             return; 
         }
         let skill = Math.floor(event.skill.id / 10000);
+		
+		let skillId = event.skill.id
+		//let skillSub = event.skill.id % 100;
+		//let packetSkillInfo = config.find(o => o.group == skillInfo.group && o.job == job);
         
         if(config.Skills[job] && config.Skills[job].includes(skill)) {
+			if (partyMembers.length == 0) return; // be in a party
             if (skill != 9 && !config.autoHeal) return; // skip heal if disabled
             if (skill == 9 && !config.autoCleanse) return; // skip cleanse if disabled
             if (skill == 9 && partyMembers.length > 4) return; // skip cleanse if in a raid
@@ -230,17 +318,28 @@ module.exports = function AutoHeal(dispatch) {
             let targetMembers = [];
             let maxTargetCount = getMaxTargets(skill);
             if (skill != 9) sortHp();
-            for (let i = 0; i < partyMembers.length; i++) {
+            for (let i = 0; i < partyMembers.length; i++) { // queue ppl to lock on to
                 if (partyMembers[i].online &&
                     partyMembers[i].hpP != undefined &&
                     partyMembers[i].hpP != 0 &&
                     ((skill == 9) ? true : partyMembers[i].hpP <= config.hpCutoff) && // (cleanse) ignore max hp
                     partyMembers[i].loc != undefined &&
-                    (partyMembers[i].loc.dist3D(playerLocation.loc) / 25) <= config.maxDistance && 
+                    //(partyMembers[i].loc.dist3D(playerLocation.loc) / 25) <= config.maxDistance && 
                     (Math.abs(partyMembers[i].loc.z - playerLocation.loc.z) / 25) <= config.maxVertical)
                     {
-                        targetMembers.push(partyMembers[i]);
-                        if (targetMembers.length == maxTargetCount) break;
+						if (skill == 37) { // if immersion
+							if ((partyMembers[i].loc.dist3D(playerLocation.loc) / 25) <= config.maxImmersionRange) {
+								targetMembers.push(partyMembers[i]);
+								if (targetMembers.length == maxTargetCount) break;
+							}
+						}
+						else { // else not immersion
+							if ((partyMembers[i].loc.dist3D(playerLocation.loc) / 25) <= config.maxDistance){
+								targetMembers.push(partyMembers[i]);
+								if (targetMembers.length == maxTargetCount) break;
+							}
+						}
+                        
                     }
             }
             
@@ -258,9 +357,60 @@ module.exports = function AutoHeal(dispatch) {
                     }, 10);
                 }
             }
-        }
+        } else if (job == 7 && (skill == 24 || skill == 28 || skill == 41) && bossInfo != null){ // Mystic and Volley of Curses || Sonorous Dreams || Contagion
+			// TODO
+            sortDistBoss();
+            if (bossInfo.length > 0 && bossInfo[0].dist <= config.maxDebuffRange) {
+                    
+					setTimeout(() => {
+						dispatch.toServer('C_CAN_LOCKON_TARGET', 3, {target: bossInfo[0].id, skill: event.skill.id});
+					}, 20);
+					
+                    if (config.autoDps) {
+                        setTimeout(() => {
+							dispatch.toServer('C_START_SKILL', 7, Object.assign({}, event, {w: playerLocation.w, skill: (event.skill.id + 10)}));
+						}, config.autoDpsDelay);
+                    }
+                }
+			
+		} else if (job == 6 && (skill == 30 || skill == 33 || skill == 35) && bossInfo != null){ // Priest and Plague of Exhaustion || Ishara's Lullaby || Energy Stars
+            sortDistBoss();
+			
+			if ((skill == 35 && (bossInfo.length > 0 && bossInfo[0].dist <= config.maxEStarsRange)) || // if estars
+			(bossInfo.length > 0 && bossInfo[0].dist <= config.maxDebuffRange)){ // other dps skill
+				setTimeout(() => {
+					dispatch.toServer('C_CAN_LOCKON_TARGET', 3, {target: bossInfo[0].id, skill: event.skill.id});
+				}, 20);
+				
+				if (config.autoDps) {
+					setTimeout(() => {
+						dispatch.toServer('C_START_SKILL', 7, Object.assign({}, event, {w: playerLocation.w, skill: (event.skill.id + 10)}));
+					}, config.autoDpsDelay);
+				}
+				
+			}
+			
+		} else if (((job == 5 && skill == 2) || // Arrow Volley
+		(job == 4 && skill == 20)) // Flaming Barrage
+		&& bossInfo != null){ 
+			sortDistBoss();
+			
+			if ((skill == 35 && (bossInfo.length > 0 && bossInfo[0].dist <= config.maxDPSRange))){
+				setTimeout(() => {
+					dispatch.toServer('C_CAN_LOCKON_TARGET', 3, {target: bossInfo[0].id, skill: event.skill.id});
+				}, 20);
+				
+				if (config.autoDps) {
+					setTimeout(() => {
+						dispatch.toServer('C_START_SKILL', 7, Object.assign({}, event, {w: playerLocation.w, skill: (event.skill.id + 10)}));
+					}, config.autoDpsDelay);
+				}
+				
+			}
+		}
         
     })
+	
 
     dispatch.hook('S_CREST_INFO', 2, (event) => {
         if (!enabled) return;
@@ -316,4 +466,24 @@ module.exports = function AutoHeal(dispatch) {
         }
         console.log(out)
     }
+	
+	function sortDistBoss() {
+        bossInfo.sort(function (a, b) {
+            return parseFloat(a.dist) - parseFloat(b.dist);
+        });
+    }
+	
+	
+	function message(msg, chat = false) {
+        if (chat == true) {
+            command.message('(Let Me Target) ' + msg);
+        } else {
+            console.log('(Let Me Target) ' + msg);
+        }
+    }
+	
+	function checkDistance(x, y, z, x1, y1, z1) {
+        return (Math.sqrt(Math.pow(x1 - x, 2) + Math.pow(y1 - y, 2) + Math.pow(z1 - z, 2))) / 25;
+    }
+	
 }
