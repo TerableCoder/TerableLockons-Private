@@ -14,6 +14,7 @@ module.exports = {
     autoCleanse: true,  // enable mystic cleanse
     smartCleanse: true,  // enable mystic cleanse
     autoDps: true,     // enable dps skills
+	autoPvP: true,     // enables dps skills in pvp
     autoDpsDelay: 50,     // auto dps Delay
     autoHeal: true,     // enable healing skills
     hpCutoff: 90,       // (healing only) ignore members that have more HP% than this
