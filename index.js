@@ -68,6 +68,85 @@ module.exports = function AutoHeal(dispatch) {
     });
     
 	
+	command.add('sphealer', (p1)=> {
+        if (p1 == null) {
+            config.spHealer = !config.spHealer;
+        } else if (p1.toLowerCase() === 'off') {
+            config.autoCast = false;
+        } else if (p1.toLowerCase() === 'on') {
+            config.autoCast = true;
+        } else {
+            command.message(p1 +' is an invalid argument');
+            return;
+        }
+        command.message('Sleep Priority Healer ' + (config.autoCast ? 'enabled' : 'disabled'));
+    });
+	
+	
+	command.add('priodps', (p1)=> {
+        if (p1 == null) {
+            config.prioDpsBeforeHealer = !config.prioDpsBeforeHealer;
+        } else if (p1.toLowerCase() === 'off') {
+            config.prioDpsBeforeHealer = false;
+        } else if (p1.toLowerCase() === 'on') {
+            config.prioDpsBeforeHealer = true;
+        } else {
+            command.message(p1 +' is an invalid argument');
+            return;
+        }
+        command.message('Priority Dps Before Priority Healer ' + (config.prioDpsBeforeHealer ? 'enabled' : 'disabled'));
+    });
+	
+	
+	command.add('sleep', (p1)=> {
+        if (p1 == null) {
+            command.message(p1 +' is an invalid argument');
+			return;
+        }
+		p1 = p1.toLowerCase();
+		
+		if (p1 == 'healer'){
+			config.healer = !config.healer;
+			command.message('Sleep Priority ' + p1 + ' = ' + (config.healer ? 'enabled' : 'disabled'));
+		} else if (p1 == 'archer') {
+			config.archer = !config.archer;
+			command.message('Sleep Priority ' + p1 + ' = ' + (config.archer ? 'enabled' : 'disabled'));
+        } else if (p1 == 'zerk'){
+			config.zerk = !config.zerk;
+			command.message('Sleep Priority ' + p1 + ' = ' + (config.zerk ? 'enabled' : 'disabled'));
+		} else if (p1 == 'lancer'){
+			config.lancer = !config.lancer;
+			command.message('Sleep Priority ' + p1 + ' = ' + (config.lancer ? 'enabled' : 'disabled'));
+		} else if (p1 == 'slayer'){
+			config.slayer = !config.slayer;
+			command.message('Sleep Priority ' + p1 + ' = ' + (config.slayer ? 'enabled' : 'disabled'));
+		} else if (p1 == 'sorc'){
+			config.sorc = !config.sorc;
+			command.message('Sleep Priority ' + p1 + ' = ' + (config.sorc ? 'enabled' : 'disabled'));
+		} else if (p1 == 'warrior'){
+			config.warrior = !config.warrior;
+			command.message('Sleep Priority ' + p1 + ' = ' + (config.warrior ? 'enabled' : 'disabled'));
+		} else if (p1 == 'reaper'){
+			config.reaper = !config.reaper;
+			command.message('Sleep Priority ' + p1 + ' = ' + (config.reaper ? 'enabled' : 'disabled'));
+		} else if (p1 == 'gunner'){
+			config.gunner = !config.gunner;
+			command.message('Sleep Priority ' + p1 + ' = ' + (config.gunner ? 'enabled' : 'disabled'));
+		} else if (p1 == 'brawler'){
+			config.brawler = !config.brawler;
+			command.message('Sleep Priority ' + p1 + ' = ' + (config.brawler ? 'enabled' : 'disabled'));
+		} else if (p1 == 'ninja'){
+			config.ninja = !config.ninja;
+			command.message('Sleep Priority ' + p1 + ' = ' + (config.ninja ? 'enabled' : 'disabled'));
+		} else if (p1 == 'valk'){
+			config.valk = !config.valk;
+			command.message('Sleep Priority ' + p1 + ' = ' + (config.valk ? 'enabled' : 'disabled'));	
+		} else {
+            command.message(p1 +' is an invalid argument');
+            return;
+        }
+    });
+	
     command.add('tp', () => {
         sortHp();
         message(JSON.stringify(partyMembers, null, 4));
@@ -85,7 +164,7 @@ module.exports = function AutoHeal(dispatch) {
         message(JSON.stringify(enemies, null, 4));
     });
 	command.add('te', () => {
-        message(enabled);
+        message(JSON.stringify(enemies, null, 4));
     });
 	command.add('ml', () => {
 		message("My Location");
@@ -243,6 +322,14 @@ module.exports = function AutoHeal(dispatch) {
 		//message("CLEARED Enemies List");
     })
     
+	/*
+    class index
+    warrior = 0, lancer = 1, slayer = 2, berserker = 3,
+    sorcerer = 4, archer = 5, priest = 6, mystic = 7,
+    reaper = 8, gunner = 9, brawler = 10, ninja = 11,
+    valkyrie = 12
+    */
+	
     dispatch.hook('S_SPAWN_USER', 13, (event) => {
         if (!enabled) return;
         if (partyMembers.length != 0) {
@@ -254,22 +341,25 @@ module.exports = function AutoHeal(dispatch) {
                 }
             }
 		}
+		
+		let theirClass = (event.templateId - 10101) % 100;
 		// if enemy, update them
 		for (let i = 0; i < enemies.length; i++) {
 			if (enemies[i].gameId.equals(event.gameId)) {
 				enemies[i].loc = event.loc;
 				enemies[i].alive = event.alive;
+				enemies[i].job = theirClass;
 				return;
 			}
 		}
-		
 		// if new enemy, add them
 		let tempPushEvent = {
 			gameId: event.gameId,
 			loc: event.loc,
 			w: event.w,
 			alive: event.alive,
-			dist: 99999999
+			dist: 99999999,
+			job: theirClass
 		}
 		enemies.push(tempPushEvent);
 	
@@ -288,6 +378,7 @@ module.exports = function AutoHeal(dispatch) {
             }
         }
 		
+		
 		// if enemy, update them
 		for (let i = 0; i < enemies.length; i++) {
 			if (enemies[i].gameId.equals(event.gameId)) {
@@ -303,7 +394,8 @@ module.exports = function AutoHeal(dispatch) {
 			loc: event.loc,
 			w: event.w,
 			alive: true,
-			dist: 99999999
+			dist: 99999999,
+			job: null
 		}
 		enemies.push(tempPushEvent);
 		
@@ -338,7 +430,8 @@ module.exports = function AutoHeal(dispatch) {
 			loc: event.loc,
 			w: event.w,
 			alive: true,
-			dist: 99999999
+			dist: 99999999,
+			job: null
 		}
 		enemies.push(tempPushEvent);
 		
@@ -373,7 +466,8 @@ module.exports = function AutoHeal(dispatch) {
 			loc: event.loc,
 			w: event.w,
 			alive: true,
-			dist: 99999999
+			dist: 99999999,
+			job: null
 		}
 		enemies.push(tempPushEvent);
 		
@@ -392,8 +486,8 @@ module.exports = function AutoHeal(dispatch) {
 				if (asd != null && asd <= 100){
 					partyMembers[i].hpP = asd;
 				} else {
-					partyMembers[i].hpP = 100;
-					command.message("S_PARTY_MEMBER_CHANGE_HP, " + partyMembers[i].playerId + " HP = " + asd);
+					//partyMembers[i].hpP = 100;
+					//command.message("S_PARTY_MEMBER_CHANGE_HP, " + partyMembers[i].playerId + " HP = " + asd);
 				}
                 //partyMembers[i].hpP = (event.curHp / event.maxHp) * 100;
 				/*let tempvar = Number(event.curHp);
@@ -435,8 +529,8 @@ module.exports = function AutoHeal(dispatch) {
 				if (asd != null && asd <= 100){
 					partyMembers[i].hpP = asd;
 				} else {
-					partyMembers[i].hpP = 100;
-					command.message("S_PARTY_MEMBER_STAT_UPDATE, " + partyMembers[i].playerId + " HP = " + asd);
+					//partyMembers[i].hpP = 100;
+					//command.message("S_PARTY_MEMBER_STAT_UPDATE, " + partyMembers[i].playerId + " HP = " + asd);
 				}
                 //partyMembers[i].hpP = (event.curHp / event.maxHp) * 100;
 				/*let tempvar = Number(event.curHp);
@@ -473,7 +567,8 @@ module.exports = function AutoHeal(dispatch) {
 			loc: event.loc,
 			w: null,
 			alive: false,
-			dist: 99999999
+			dist: 99999999,
+			job: null
 		}
 		enemies.push(tempPushEvent);
 		
@@ -573,7 +668,7 @@ module.exports = function AutoHeal(dispatch) {
 // use 8 once patch 75
     dispatch.hook('S_ACTION_STAGE', 7, { order: -10 }, (event) => {
 
-        if (bossInfo.length <= 0) {
+        if (bossInfo.length > 0) {
 			for (let b = 0; b < bossInfo.length; b++) {
 				if (event.gameId.equals(bossInfo[b].id)) {
 					bossInfo[b].x = event.loc.x;
@@ -798,10 +893,140 @@ module.exports = function AutoHeal(dispatch) {
             }
 			//command.message("Priest Lockon Enemies Completed - eStars");
 			
+		} else if (job == 6 && (skill == 33) && enemies.length != 0){ // Priest and Ishara's Lullaby
+			//command.message("Priest Lockon Enemies - Sleep");
+			
+			let targetMembers = [];
+            let maxTargetCount = 1;
+			
+			for (let i = 0; i < enemies.length; i++) { // calculate distance
+				enemies[i].dist = enemies[i].loc.dist3D(playerLocation.loc) / 25;
+			}
+			sortDistEnemies();
+			
+			/*
+			class index
+			warrior = 0, lancer = 1, slayer = 2, berserker = 3,
+			sorcerer = 4, archer = 5, priest = 6, mystic = 7,
+			reaper = 8, gunner = 9, brawler = 10, ninja = 11,
+			valkyrie = 12
+			*/
+			
+			let dpsPrio = config.archer || config.zerk || config.lancer || config.slayer || config.sorc 
+			|| config.warrior || config.reaper || config.gunner || config.brawler || config.ninja || config.valk;
+			
+			// look for priority dps
+			if (!config.healer && dpsPrio){ // healer false, a dps = true
+				for (let i = 0; i < enemies.length; i++) { // queue ppl to lock on to
+					if (enemies[i].alive == true &&
+						enemies[i].loc != undefined &&
+						(Math.abs(enemies[i].loc.z - playerLocation.loc.z) / 25) <= config.maxVertical){
+						if (enemies[i].dist <= config.maxEStarsRange) {
+							if ((config.archer ? enemies[i].job == 5 : false) || 
+							(config.zerk ? enemies[i].job == 3 : false) || 
+							(config.lancer ? enemies[i].job == 1 : false) || 
+							(config.slayer ? enemies[i].job == 2 : false) || 
+							(config.sorc ? enemies[i].job == 4 : false) || 
+							(config.warrior ? enemies[i].job == 0 : false) || 
+							(config.reaper ? enemies[i].job == 8 : false) || 
+							(config.gunner ? enemies[i].job == 9 : false) || 
+							(config.brawler ? enemies[i].job == 10 : false) || 
+							(config.ninja ? enemies[i].job == 11 : false) || 
+							(config.valk ? enemies[i].job == 12 : false)){
+								targetMembers.push(enemies[i]);
+								//command.message("Priest Enemy Added - Sleep" + (i+1));
+								if (targetMembers.length == maxTargetCount) break;
+							}
+						}
+					}
+				}
+			}
+			
+			// look for healer
+			if (config.healer){ // healer = true
+				if (targetMembers.length < maxTargetCount){
+					for (let i = 0; i < enemies.length; i++) { // queue ppl to lock on to
+						if (enemies[i].alive == true &&
+							enemies[i].loc != undefined &&
+							(enemies[i].job == 6 || enemies[i].job == 7) &&
+							(Math.abs(enemies[i].loc.z - playerLocation.loc.z) / 25) <= config.maxVertical){
+							if (enemies[i].dist <= config.maxEStarsRange) {
+								targetMembers.push(enemies[i]);
+								//command.message("Priest Enemy Added - Sleep" + (i+1));
+								if (targetMembers.length == maxTargetCount) break;
+							}
+						}
+					}
+				}
+			}
+			
+			// look for priority dps
+			if (dpsPrio){ // a dps = true
+				if (targetMembers.length < maxTargetCount){
+					for (let i = 0; i < enemies.length; i++) { // queue ppl to lock on to
+						if (enemies[i].alive == true &&
+							enemies[i].loc != undefined &&
+							(Math.abs(enemies[i].loc.z - playerLocation.loc.z) / 25) <= config.maxVertical){
+							if (enemies[i].dist <= config.maxEStarsRange) {
+								if ((config.archer ? enemies[i].job == 5 : false) || 
+								(config.zerk ? enemies[i].job == 3 : false) || 
+								(config.lancer ? enemies[i].job == 1 : false) || 
+								(config.slayer ? enemies[i].job == 2 : false) || 
+								(config.sorc ? enemies[i].job == 4 : false) || 
+								(config.warrior ? enemies[i].job == 0 : false) || 
+								(config.reaper ? enemies[i].job == 8 : false) || 
+								(config.gunner ? enemies[i].job == 9 : false) || 
+								(config.brawler ? enemies[i].job == 10 : false) || 
+								(config.ninja ? enemies[i].job == 11 : false) || 
+								(config.valk ? enemies[i].job == 12 : false)){
+									targetMembers.push(enemies[i]);
+									//command.message("Priest Enemy Added - Sleep" + (i+1));
+									if (targetMembers.length == maxTargetCount) break;
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			// no priority target found, look for anyone
+			if (targetMembers.length < maxTargetCount){
+				for (let i = 0; i < enemies.length; i++) { // queue ppl to lock on to
+					if (enemies[i].alive == true &&
+						enemies[i].loc != undefined &&
+						(Math.abs(enemies[i].loc.z - playerLocation.loc.z) / 25) <= config.maxVertical){
+						if (enemies[i].dist <= config.maxEStarsRange) {
+							targetMembers.push(enemies[i]);
+							//command.message("Priest Enemy Added - eStars" + (i+1));
+							if (targetMembers.length == maxTargetCount) break;
+						}
+					}
+				}
+			}
+			
+			if (targetMembers.length > 0) {
+                if (debug) outputDebug(event.skill);
+                for (let i = 0; i < targetMembers.length; i++) {
+                    setTimeout(() => {
+                        dispatch.toServer('C_CAN_LOCKON_TARGET', 3, {target: targetMembers[i].gameId, skill: event.skill.id});
+                    }, 5);
+                }
+                
+                if (config.autoPvP) {
+                    setTimeout(() => {
+                        dispatch.toServer('C_START_SKILL', 7, Object.assign({}, event, {w: playerLocation.w, skill: (event.skill.id + 10)}));
+                    }, 10);
+                }
+				
+				//command.message("Priest Lockon Completed - Sleep");
+            }
+			//command.message("Priest Lockon Enemies Completed - Sleep");
+			
 		} else {
 			//command.message("Enemies.length = " + enemies.length);
 			//command.message("bossInfo.length = " + bossInfo.length);
         }
+		
     })
 	
 

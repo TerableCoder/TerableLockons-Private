@@ -24,6 +24,23 @@ module.exports = {
 	maxImmersionRange: 28, // Immersion desyncs past 30 meters
 	maxDebuffRange: 30, 
 	maxDPSRange: 35, 
-	maxEStarsRange: 25
+	maxEStarsRange: 25, // the buff is max range 25
+	
+	// sleep prioritize this class
+	healer: true,
+	archer: false,
+	zerk: false,
+	lancer: false,
+	slayer: false,
+	sorc: false,
+	warrior: false,
+	reaper: false,
+	gunner: false,
+	brawler: false,
+	ninja: false,
+	valk: false,
+	prioDpsBeforeHealer: false
+	
+	
 	
 }
