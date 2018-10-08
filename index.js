@@ -38,7 +38,6 @@ module.exports = function AutoHeal(dispatch) {
         }        
         command.message('Healing ' + (config.autoHeal ? 'enabled (' + config.hpCutoff + '%)' : 'disabled'));
     });
-    
     command.add('autocleanse', (p1) => {
         if (p1 == null) {
             config.autoCleanse = !config.autoCleanse;
@@ -52,7 +51,6 @@ module.exports = function AutoHeal(dispatch) {
         }
         command.message('Cleansing ' + (config.autoCleanse ? 'enabled' : 'disabled'));
     });
-    
     command.add('autocast', (p1)=> {
         if (p1 == null) {
             config.autoCast = !config.autoCast;
@@ -66,37 +64,62 @@ module.exports = function AutoHeal(dispatch) {
         }        
         command.message('Casting ' + (config.autoCast ? 'enabled' : 'disabled'));
     });
-    
 	
-	command.add('sphealer', (p1)=> {
+	command.add('sleepdps', (p1)=> {
         if (p1 == null) {
-            config.spHealer = !config.spHealer;
+            config.sleepPrioDpsBeforeHealer = !config.sleepPrioDpsBeforeHealer;
         } else if (p1.toLowerCase() === 'off') {
-            config.autoCast = false;
+            config.sleepPrioDpsBeforeHealer = false;
         } else if (p1.toLowerCase() === 'on') {
-            config.autoCast = true;
+            config.sleepPrioDpsBeforeHealer = true;
         } else {
             command.message(p1 +' is an invalid argument');
             return;
         }
-        command.message('Sleep Priority Healer ' + (config.autoCast ? 'enabled' : 'disabled'));
+        command.message('Sleep Priority Dps Before Priority Healer ' + (config.sleepPrioDpsBeforeHealer ? 'enabled' : 'disabled'));
     });
-	
-	
-	command.add('priodps', (p1)=> {
+	/*
+	command.add('esdps', (p1)=> {
         if (p1 == null) {
-            config.prioDpsBeforeHealer = !config.prioDpsBeforeHealer;
+            config.eStarsPrioDpsBeforeHealer = !config.eStarsPrioDpsBeforeHealer;
         } else if (p1.toLowerCase() === 'off') {
-            config.prioDpsBeforeHealer = false;
+            config.eStarsPrioDpsBeforeHealer = false;
         } else if (p1.toLowerCase() === 'on') {
-            config.prioDpsBeforeHealer = true;
+            config.eStarsPrioDpsBeforeHealer = true;
         } else {
             command.message(p1 +' is an invalid argument');
             return;
         }
-        command.message('Priority Dps Before Priority Healer ' + (config.prioDpsBeforeHealer ? 'enabled' : 'disabled'));
+        command.message('E Stars Priority Dps Before Priority Healer ' + (config.eStarsPrioDpsBeforeHealer ? 'enabled' : 'disabled'));
+    });
+	*/
+	command.add('ppdps', (p1)=> {
+        if (p1 == null) {
+            config.plaguePrioDpsBeforeHealer = !config.plaguePrioDpsBeforeHealer;
+        } else if (p1.toLowerCase() === 'off') {
+            config.plaguePrioDpsBeforeHealer = false;
+        } else if (p1.toLowerCase() === 'on') {
+            config.plaguePrioDpsBeforeHealer = true;
+        } else {
+            command.message(p1 +' is an invalid argument');
+            return;
+        }
+        command.message('Plague Priority Dps Before Priority Healer ' + (config.plaguePrioDpsBeforeHealer ? 'enabled' : 'disabled'));
     });
 	
+	command.add('targetboss', (p1)=> {
+        if (p1 == null) {
+            config.targetBoss = !config.targetBoss;
+        } else if (p1.toLowerCase() === 'off') {
+            config.targetBoss = false;
+        } else if (p1.toLowerCase() === 'on') {
+            config.targetBoss = true;
+        } else {
+            command.message(p1 +' is an invalid argument');
+            return;
+        }
+        command.message('Target boss ' + (config.targetBoss ? 'enabled' : 'disabled'));
+    });
 	
 	command.add('sleep', (p1)=> {
         if (p1 == null) {
@@ -147,6 +170,82 @@ module.exports = function AutoHeal(dispatch) {
         }
     });
 	
+    command.add('sleepy', (p1) => {
+		let name = p1.toString();
+		if (!config.sleepyPlayers[0].includes(name)){
+			config.sleepyPlayers[0].push(name);
+		}
+        message(JSON.stringify(config.sleepyPlayers[0], null, 4));
+    });
+	command.add('es', (p1) => {
+		let name = p1.toString();
+		if (!config.freeStars[0].includes(name)){
+			config.freeStars[0].push(name);
+		}
+        message(JSON.stringify(config.freeStars[0], null, 4));
+    });
+	command.add('pp', (p1) => {
+		let name = p1.toString();
+		if (!config.plaguePrio[0].includes(name)){
+			config.plaguePrio[0].push(name);
+		}
+        message(JSON.stringify(config.plaguePrio[0], null, 4));
+    });
+	command.add('bl', (p1) => {
+		let name = p1.toString();
+		if (!config.blockList[0].includes(name)){
+			config.blockList[0].push(name);
+		}
+        message(JSON.stringify(config.blockList[0], null, 4));
+    });
+	command.add('dh', (p1) => {
+		let name = p1.toString();
+		if (!config.dontHeal[0].includes(name)){
+			config.dontHeal[0].push(name);
+		}
+        message(JSON.stringify(config.dontHeal[0], null, 4));
+    });
+	command.add('sleepyremove', (p1) => {
+		let name = p1.toString();
+		let index = config.sleepyPlayers[0].indexOf(name);
+		if (index > -1){
+			config.sleepyPlayers[0].splice(index, 1);
+		}
+        message(JSON.stringify(config.sleepyPlayers[0], null, 4));
+    });
+	command.add('esremove', (p1) => {
+		let name = p1.toString();
+		let index = config.freeStars[0].indexOf(name);
+		if (index > -1){
+			config.freeStars[0].splice(index, 1);
+		}
+        message(JSON.stringify(config.freeStars[0], null, 4));
+    });
+	command.add('ppremove', (p1) => {
+		let name = p1.toString();
+		let index = config.plaguePrio[0].indexOf(name);
+		if (index > -1){
+			config.plaguePrio[0].splice(index, 1);
+		}
+        message(JSON.stringify(config.plaguePrio[0], null, 4));
+    });
+	command.add('blremove', (p1) => {
+		let name = p1.toString();
+		let index = config.blockList[0].indexOf(name);
+		if (index > -1){
+			config.blockList[0].splice(index, 1);
+		}
+        message(JSON.stringify(config.blockList[0], null, 4));
+    });
+	command.add('dhremove', (p1) => {
+		let name = p1.toString();
+		let index = config.dontHeal[0].indexOf(name);
+		if (index > -1){
+			config.dontHeal[0].splice(index, 1);
+		}
+        message(JSON.stringify(config.dontHeal[0], null, 4));
+    });
+	
     command.add('tp', () => {
         sortHp();
         message(JSON.stringify(partyMembers, null, 4));
@@ -163,6 +262,10 @@ module.exports = function AutoHeal(dispatch) {
         enemies = [];
         message(JSON.stringify(enemies, null, 4));
     });
+	command.add('cp', () => {
+        partyMembers = [];
+        message(JSON.stringify(partyMembers, null, 4));
+    });
 	command.add('te', () => {
         message(JSON.stringify(enemies, null, 4));
     });
@@ -170,6 +273,7 @@ module.exports = function AutoHeal(dispatch) {
 		message("My Location");
         message(JSON.stringify(playerLocation, null, 4));
     });
+	
 	
     dispatch.hook('S_LOGIN', 10, (event) => {
         playerId = event.playerId;
@@ -349,6 +453,7 @@ module.exports = function AutoHeal(dispatch) {
 				enemies[i].loc = event.loc;
 				enemies[i].alive = event.alive;
 				enemies[i].job = theirClass;
+				enemies[i].name = event.name;
 				return;
 			}
 		}
@@ -359,7 +464,8 @@ module.exports = function AutoHeal(dispatch) {
 			w: event.w,
 			alive: event.alive,
 			dist: 99999999,
-			job: theirClass
+			job: theirClass,
+			name: event.name
 		}
 		enemies.push(tempPushEvent);
 	
@@ -395,7 +501,8 @@ module.exports = function AutoHeal(dispatch) {
 			w: event.w,
 			alive: true,
 			dist: 99999999,
-			job: null
+			job: null,
+			name: ""
 		}
 		enemies.push(tempPushEvent);
 		
@@ -431,7 +538,8 @@ module.exports = function AutoHeal(dispatch) {
 			w: event.w,
 			alive: true,
 			dist: 99999999,
-			job: null
+			job: null,
+			name: ""
 		}
 		enemies.push(tempPushEvent);
 		
@@ -467,7 +575,8 @@ module.exports = function AutoHeal(dispatch) {
 			w: event.w,
 			alive: true,
 			dist: 99999999,
-			job: null
+			job: null,
+			name: ""
 		}
 		enemies.push(tempPushEvent);
 		
@@ -568,7 +677,8 @@ module.exports = function AutoHeal(dispatch) {
 			w: null,
 			alive: false,
 			dist: 99999999,
-			job: null
+			job: null,
+			name: ""
 		}
 		enemies.push(tempPushEvent);
 		
@@ -723,18 +833,20 @@ module.exports = function AutoHeal(dispatch) {
                     ((skill == 9) ? true : partyMembers[i].hpP <= config.hpCutoff) && // (cleanse) ignore max hp
                     partyMembers[i].loc != undefined &&
                     //(partyMembers[i].loc.dist3D(playerLocation.loc) / 25) <= config.maxDistance && 
-                    (Math.abs(partyMembers[i].loc.z - playerLocation.loc.z) / 25) <= config.maxVertical)
-                    {
+                    (Math.abs(partyMembers[i].loc.z - playerLocation.loc.z) / 25) <= config.maxVertical){
 						if (skill == 37) { // if immersion
 							if ((partyMembers[i].loc.dist3D(playerLocation.loc) / 25) <= config.maxImmersionRange) {
-								targetMembers.push(partyMembers[i]);
-								if (targetMembers.length == maxTargetCount) break;
+								if (!config.dontHeal[0].includes(partyMembers[i].name)){
+									targetMembers.push(partyMembers[i]);
+									if (targetMembers.length == maxTargetCount) break;
+								}
 							}
-						}
-						else { // else not immersion
+						} else { // else not immersion
 							if ((partyMembers[i].loc.dist3D(playerLocation.loc) / 25) <= config.maxDistance){
-								targetMembers.push(partyMembers[i]);
-								if (targetMembers.length == maxTargetCount) break;
+								if (!config.dontHeal[0].includes(partyMembers[i].name)){
+									targetMembers.push(partyMembers[i]);
+									if (targetMembers.length == maxTargetCount) break;
+								}
 							}
 						}
                         
@@ -756,12 +868,11 @@ module.exports = function AutoHeal(dispatch) {
                 }
             }
 			//command.message("Priest or mystic heal completed!");
-        } else if (job == 7 && (skill == 24 || skill == 28 || skill == 41) && bossInfo != null && bossInfo.length != 0){ // Mystic and Volley of Curses || Sonorous Dreams || Contagion
+        } else if (job == 7 && (skill == 24 || skill == 28 || skill == 41) && bossInfo != null && bossInfo.length != 0 && targetBoss){ // Mystic and Volley of Curses || Sonorous Dreams || Contagion
 			// TODO
 			//command.message("Mystic lockon attacks");
             sortDistBoss();
             if (bossInfo.length > 0 && bossInfo[0].dist <= config.maxDebuffRange) {
-                    
 				setTimeout(() => {
 					dispatch.toServer('C_CAN_LOCKON_TARGET', 3, {target: bossInfo[0].id, skill: event.skill.id});
 				}, 20);
@@ -774,12 +885,12 @@ module.exports = function AutoHeal(dispatch) {
 			}
 			//command.message("Mystic lockon Completed");
 			
-		} else if (job == 6 && (skill == 30 || skill == 33 || skill == 35) && bossInfo != null && bossInfo.length != 0){ // Priest and Plague of Exhaustion || Ishara's Lullaby || Energy Stars
+		} else if (job == 6 && (skill == 30 || skill == 33 || skill == 35) && bossInfo != null && bossInfo.length != 0 && targetBoss){ // Priest and Plague of Exhaustion || Ishara's Lullaby || Energy Stars
 			//command.message("Priest lockon attacks");
             sortDistBoss();
 			
 			if ((skill == 35 && (bossInfo.length > 0 && bossInfo[0].dist <= config.maxEStarsRange)) || // if estars
-			(bossInfo.length > 0 && bossInfo[0].dist <= config.maxDebuffRange)){ // other dps skill
+			((skill == 30 || skill == 33) && (bossInfo.length > 0 && bossInfo[0].dist <= config.maxDebuffRange))){ // other dps skill
 				setTimeout(() => {
 					dispatch.toServer('C_CAN_LOCKON_TARGET', 3, {target: bossInfo[0].id, skill: event.skill.id});
 				}, 20);
@@ -795,11 +906,12 @@ module.exports = function AutoHeal(dispatch) {
 			
 		} else if (((job == 5 && skill == 2) || // Arrow Volley
 		(job == 4 && skill == 20)) // Flaming Barrage
-		&& bossInfo != null){ 
+		&& bossInfo != null && targetBoss){ 
+			// TODO
 			//command.message("Sorc or Archer lockon");
 			sortDistBoss();
 			
-			if ((skill == 35 && (bossInfo.length > 0 && bossInfo[0].dist <= config.maxDPSRange))){
+			if (bossInfo.length > 0 && bossInfo[0].dist <= config.maxDPSRange){
 				setTimeout(() => {
 					dispatch.toServer('C_CAN_LOCKON_TARGET', 3, {target: bossInfo[0].id, skill: event.skill.id});
 				}, 20);
@@ -823,14 +935,128 @@ module.exports = function AutoHeal(dispatch) {
 			}
 			sortDistEnemies();
 			
+			
+			// plague priority players
+			if (config.plaguePrio[0].length > 0){ // we have plague priority players
+				for (let i = 0; i < enemies.length; i++) { // queue ppl to lock on to
+					if (config.plaguePrio[0].includes(enemies[i].name)){ // matching name?
+						if (enemies[i].alive == true &&
+							enemies[i].loc != undefined &&
+							(Math.abs(enemies[i].loc.z - playerLocation.loc.z) / 25) <= config.maxVertical){
+							if (enemies[i].dist <= config.maxDebuffRange) {
+								if (!config.blockList[0].includes(enemies[i].name)){
+									targetMembers.push(enemies[i]);
+									//command.message("Priest Enemy Added - Plague" + (i+1));
+									if (targetMembers.length == maxTargetCount) break;
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			/*
+			class index
+			warrior = 0, lancer = 1, slayer = 2, berserker = 3,
+			sorcerer = 4, archer = 5, priest = 6, mystic = 7,
+			reaper = 8, gunner = 9, brawler = 10, ninja = 11,
+			valkyrie = 12
+			*/
+			
+			let dpsPrio = config.archer || config.zerk || config.lancer || config.slayer || config.sorc 
+			|| config.warrior || config.reaper || config.gunner || config.brawler || config.ninja || config.valk;
+			
+			// look for priority dps
+			if (!config.healer && dpsPrio || config.plaguePrioDpsBeforeHealer){ // healer = false && a dps = true OR plaguePrioDpsBeforeHealer = true
+				for (let i = 0; i < enemies.length; i++) { // queue ppl to lock on to
+					if (enemies[i].alive == true &&
+						enemies[i].loc != undefined &&
+						(Math.abs(enemies[i].loc.z - playerLocation.loc.z) / 25) <= config.maxVertical){
+						if (enemies[i].dist <= config.maxDebuffRange) {
+							if ((config.archer ? enemies[i].job == 5 : false) || 
+							(config.zerk ? enemies[i].job == 3 : false) || 
+							(config.lancer ? enemies[i].job == 1 : false) || 
+							(config.slayer ? enemies[i].job == 2 : false) || 
+							(config.sorc ? enemies[i].job == 4 : false) || 
+							(config.warrior ? enemies[i].job == 0 : false) || 
+							(config.reaper ? enemies[i].job == 8 : false) || 
+							(config.gunner ? enemies[i].job == 9 : false) || 
+							(config.brawler ? enemies[i].job == 10 : false) || 
+							(config.ninja ? enemies[i].job == 11 : false) || 
+							(config.valk ? enemies[i].job == 12 : false)){
+								if (!config.blockList[0].includes(enemies[i].name)){
+									targetMembers.push(enemies[i]);
+									//command.message("Priest Enemy Added - Sleep" + (i+1));
+									if (targetMembers.length == maxTargetCount) break;
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			// look for healer
+			if (config.healer){ // healer = true
+				if (targetMembers.length < maxTargetCount){
+					for (let i = 0; i < enemies.length; i++) { // queue ppl to lock on to
+						if (enemies[i].alive == true &&
+							enemies[i].loc != undefined &&
+							(enemies[i].job == 6 || enemies[i].job == 7) &&
+							(Math.abs(enemies[i].loc.z - playerLocation.loc.z) / 25) <= config.maxVertical){
+							if (enemies[i].dist <= config.maxDebuffRange) {
+								if (!config.blockList[0].includes(enemies[i].name)){
+									targetMembers.push(enemies[i]);
+									//command.message("Priest Enemy Added - Sleep" + (i+1));
+									if (targetMembers.length == maxTargetCount) break;
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			// look for priority dps
+			if (dpsPrio){ // a dps = true
+				if (targetMembers.length < maxTargetCount){
+					for (let i = 0; i < enemies.length; i++) { // queue ppl to lock on to
+						if (enemies[i].alive == true &&
+							enemies[i].loc != undefined &&
+							(Math.abs(enemies[i].loc.z - playerLocation.loc.z) / 25) <= config.maxVertical){
+							if (enemies[i].dist <= config.maxDebuffRange) {
+								if ((config.archer ? enemies[i].job == 5 : false) || 
+								(config.zerk ? enemies[i].job == 3 : false) || 
+								(config.lancer ? enemies[i].job == 1 : false) || 
+								(config.slayer ? enemies[i].job == 2 : false) || 
+								(config.sorc ? enemies[i].job == 4 : false) || 
+								(config.warrior ? enemies[i].job == 0 : false) || 
+								(config.reaper ? enemies[i].job == 8 : false) || 
+								(config.gunner ? enemies[i].job == 9 : false) || 
+								(config.brawler ? enemies[i].job == 10 : false) || 
+								(config.ninja ? enemies[i].job == 11 : false) || 
+								(config.valk ? enemies[i].job == 12 : false)){
+									if (!config.blockList[0].includes(enemies[i].name)){
+										targetMembers.push(enemies[i]);
+										//command.message("Priest Enemy Added - Sleep" + (i+1));
+										if (targetMembers.length == maxTargetCount) break;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			// no priority target found, look for anyone
             for (let i = 0; i < enemies.length; i++) { // queue ppl to lock on to
                 if (enemies[i].alive == true &&
                     enemies[i].loc != undefined &&
                     (Math.abs(enemies[i].loc.z - playerLocation.loc.z) / 25) <= config.maxVertical){
-					if (enemies[i].dist <= config.maxEStarsRange) {
-						targetMembers.push(enemies[i]);
-						//command.message("Priest Enemy Added - Plague" + (i+1));
-						if (targetMembers.length == maxTargetCount) break;
+					if (enemies[i].dist <= config.maxDebuffRange) {
+						if (!config.blockList[0].includes(enemies[i].name)){
+							targetMembers.push(enemies[i]);
+							//command.message("Priest Enemy Added - Plague" + (i+1));
+							if (targetMembers.length == maxTargetCount) break;
+						}
 					}
 				}
             }
@@ -863,14 +1089,35 @@ module.exports = function AutoHeal(dispatch) {
 			}
 			sortDistEnemies();
 			
+			// free eStars players
+			if (config.freeStars[0].length > 0){ // we have free eStars players
+				for (let i = 0; i < enemies.length; i++) { // queue ppl to lock on to
+					if (config.freeStars[0].includes(enemies[i].name)){ // matching name?
+						if (enemies[i].alive == true &&
+							enemies[i].loc != undefined &&
+							(Math.abs(enemies[i].loc.z - playerLocation.loc.z) / 25) <= config.maxVertical){
+							if (enemies[i].dist <= config.maxEStarsRange) {
+								if (!config.blockList[0].includes(enemies[i].name)){
+									targetMembers.push(enemies[i]);
+									//command.message("Priest Enemy Added - eStars" + (i+1));
+									if (targetMembers.length == maxTargetCount) break;
+								}
+							}
+						}
+					}
+				}
+			}
+			
             for (let i = 0; i < enemies.length; i++) { // queue ppl to lock on to
                 if (enemies[i].alive == true &&
                     enemies[i].loc != undefined &&
                     (Math.abs(enemies[i].loc.z - playerLocation.loc.z) / 25) <= config.maxVertical){
 					if (enemies[i].dist <= config.maxEStarsRange) {
-						targetMembers.push(enemies[i]);
-						//command.message("Priest Enemy Added - eStars" + (i+1));
-						if (targetMembers.length == maxTargetCount) break;
+						if (!config.blockList[0].includes(enemies[i].name)){
+							targetMembers.push(enemies[i]);
+							//command.message("Priest Enemy Added - eStars" + (i+1));
+							if (targetMembers.length == maxTargetCount) break;
+						}
 					}
 				}
             }
@@ -904,6 +1151,26 @@ module.exports = function AutoHeal(dispatch) {
 			}
 			sortDistEnemies();
 			
+			
+			// sleepy players
+			if (config.sleepyPlayers[0].length > 0){ // we have sleepy players
+				for (let i = 0; i < enemies.length; i++) { // queue ppl to lock on to
+					if (config.sleepyPlayers[0].includes(enemies[i].name)){ // matching name?
+						if (enemies[i].alive == true &&
+							enemies[i].loc != undefined &&
+							(Math.abs(enemies[i].loc.z - playerLocation.loc.z) / 25) <= config.maxVertical){
+							if (enemies[i].dist <= config.maxDebuffRange) {
+								if (!config.blockList[0].includes(enemies[i].name)){
+									targetMembers.push(enemies[i]);
+									//command.message("Priest Enemy Added - Sleep" + (i+1));
+									if (targetMembers.length == maxTargetCount) break;
+								}
+							}
+						}
+					}
+				}
+			}
+			
 			/*
 			class index
 			warrior = 0, lancer = 1, slayer = 2, berserker = 3,
@@ -916,12 +1183,12 @@ module.exports = function AutoHeal(dispatch) {
 			|| config.warrior || config.reaper || config.gunner || config.brawler || config.ninja || config.valk;
 			
 			// look for priority dps
-			if (!config.healer && dpsPrio){ // healer false, a dps = true
+			if (!config.healer && dpsPrio || config.sleepPrioDpsBeforeHealer){ // healer = false && a dps = true OR sleepPrioDpsBeforeHealer = true
 				for (let i = 0; i < enemies.length; i++) { // queue ppl to lock on to
 					if (enemies[i].alive == true &&
 						enemies[i].loc != undefined &&
 						(Math.abs(enemies[i].loc.z - playerLocation.loc.z) / 25) <= config.maxVertical){
-						if (enemies[i].dist <= config.maxEStarsRange) {
+						if (enemies[i].dist <= config.maxDebuffRange) {
 							if ((config.archer ? enemies[i].job == 5 : false) || 
 							(config.zerk ? enemies[i].job == 3 : false) || 
 							(config.lancer ? enemies[i].job == 1 : false) || 
@@ -933,9 +1200,11 @@ module.exports = function AutoHeal(dispatch) {
 							(config.brawler ? enemies[i].job == 10 : false) || 
 							(config.ninja ? enemies[i].job == 11 : false) || 
 							(config.valk ? enemies[i].job == 12 : false)){
-								targetMembers.push(enemies[i]);
-								//command.message("Priest Enemy Added - Sleep" + (i+1));
-								if (targetMembers.length == maxTargetCount) break;
+								if (!config.blockList[0].includes(enemies[i].name)){
+									targetMembers.push(enemies[i]);
+									//command.message("Priest Enemy Added - Sleep" + (i+1));
+									if (targetMembers.length == maxTargetCount) break;
+								}
 							}
 						}
 					}
@@ -950,10 +1219,12 @@ module.exports = function AutoHeal(dispatch) {
 							enemies[i].loc != undefined &&
 							(enemies[i].job == 6 || enemies[i].job == 7) &&
 							(Math.abs(enemies[i].loc.z - playerLocation.loc.z) / 25) <= config.maxVertical){
-							if (enemies[i].dist <= config.maxEStarsRange) {
-								targetMembers.push(enemies[i]);
-								//command.message("Priest Enemy Added - Sleep" + (i+1));
-								if (targetMembers.length == maxTargetCount) break;
+							if (enemies[i].dist <= config.maxDebuffRange) {
+								if (!config.blockList[0].includes(enemies[i].name)){
+									targetMembers.push(enemies[i]);
+									//command.message("Priest Enemy Added - Sleep" + (i+1));
+									if (targetMembers.length == maxTargetCount) break;
+								}
 							}
 						}
 					}
@@ -967,7 +1238,7 @@ module.exports = function AutoHeal(dispatch) {
 						if (enemies[i].alive == true &&
 							enemies[i].loc != undefined &&
 							(Math.abs(enemies[i].loc.z - playerLocation.loc.z) / 25) <= config.maxVertical){
-							if (enemies[i].dist <= config.maxEStarsRange) {
+							if (enemies[i].dist <= config.maxDebuffRange) {
 								if ((config.archer ? enemies[i].job == 5 : false) || 
 								(config.zerk ? enemies[i].job == 3 : false) || 
 								(config.lancer ? enemies[i].job == 1 : false) || 
@@ -979,9 +1250,11 @@ module.exports = function AutoHeal(dispatch) {
 								(config.brawler ? enemies[i].job == 10 : false) || 
 								(config.ninja ? enemies[i].job == 11 : false) || 
 								(config.valk ? enemies[i].job == 12 : false)){
-									targetMembers.push(enemies[i]);
-									//command.message("Priest Enemy Added - Sleep" + (i+1));
-									if (targetMembers.length == maxTargetCount) break;
+									if (!config.blockList[0].includes(enemies[i].name)){
+										targetMembers.push(enemies[i]);
+										//command.message("Priest Enemy Added - Sleep" + (i+1));
+										if (targetMembers.length == maxTargetCount) break;
+									}
 								}
 							}
 						}
@@ -995,10 +1268,12 @@ module.exports = function AutoHeal(dispatch) {
 					if (enemies[i].alive == true &&
 						enemies[i].loc != undefined &&
 						(Math.abs(enemies[i].loc.z - playerLocation.loc.z) / 25) <= config.maxVertical){
-						if (enemies[i].dist <= config.maxEStarsRange) {
-							targetMembers.push(enemies[i]);
-							//command.message("Priest Enemy Added - eStars" + (i+1));
-							if (targetMembers.length == maxTargetCount) break;
+						if (enemies[i].dist <= config.maxDebuffRange) {
+							if (!config.blockList[0].includes(enemies[i].name)){
+								targetMembers.push(enemies[i]);
+								//command.message("Priest Enemy Added - eStars" + (i+1));
+								if (targetMembers.length == maxTargetCount) break;
+							}
 						}
 					}
 				}
