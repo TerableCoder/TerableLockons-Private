@@ -12,7 +12,7 @@ module.exports = {
     
     autoCast: true,     // true = skills auto lockon and cast. false = pre-lockon onto targets and casting is done manually
     autoCleanse: true,  // enable mystic cleanse
-    smartCleanse: true,  // enable mystic cleanse
+    //smartCleanse: true,  // enable mystic cleanse
     autoDps: true,     // enable dps skills
 	autoPvP: true,     // enables dps skills in pvp
     autoDpsDelay: 50,     // auto dps Delay
@@ -40,6 +40,19 @@ module.exports = {
 	brawler: false,
 	ninja: false,
 	valk: false,
+	// plague prioritize this class
+	phealer: true,
+	parcher: false,
+	pzerk: false,
+	plancer: false,
+	pslayer: false,
+	psorc: false,
+	pwarrior: false,
+	preaper: false,
+	pgunner: false,
+	pbrawler: false,
+	pninja: false,
+	pvalk: false,
 	
 	sleepPrioDpsBeforeHealer: false,
 	//eStarsPrioDpsBeforeHealer: false,
