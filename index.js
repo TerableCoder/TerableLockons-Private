@@ -945,7 +945,7 @@ module.exports = function AutoHeal(dispatch) {
                 }
             }
 			//command.message("Priest or mystic heal completed!");
-        } else if (job == 7 && (skill == 24 || skill == 28 || skill == 41) && bossInfo != null && bossInfo.length != 0 && targetBoss){ // Mystic and Volley of Curses || Sonorous Dreams || Contagion
+        } else if (job == 7 && (skill == 24 || skill == 28 || skill == 41) && bossInfo != null && bossInfo.length != 0 && config.targetBoss){ // Mystic and Volley of Curses || Sonorous Dreams || Contagion
 			// TODO
 			//command.message("Mystic lockon attacks");
             sortDistBoss();
@@ -962,7 +962,7 @@ module.exports = function AutoHeal(dispatch) {
 			}
 			//command.message("Mystic lockon Completed");
 			
-		} else if (job == 6 && (skill == 30 || skill == 33 || skill == 35) && bossInfo != null && bossInfo.length != 0 && targetBoss){ // Priest and Plague of Exhaustion || Ishara's Lullaby || Energy Stars
+		} else if (job == 6 && (skill == 30 || skill == 33 || skill == 35) && bossInfo != null && bossInfo.length != 0 && config.targetBoss){ // Priest and Plague of Exhaustion || Ishara's Lullaby || Energy Stars
 			//command.message("Priest lockon attacks");
             sortDistBoss();
 			
@@ -983,7 +983,7 @@ module.exports = function AutoHeal(dispatch) {
 			
 		} else if (((job == 5 && skill == 2) || // Arrow Volley
 		(job == 4 && skill == 20)) // Flaming Barrage
-		&& bossInfo != null && targetBoss){ 
+		&& bossInfo != null && config.targetBoss){ 
 			// TODO
 			//command.message("Sorc or Archer lockon");
 			sortDistBoss();

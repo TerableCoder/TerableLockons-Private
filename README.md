@@ -119,6 +119,8 @@ TODO: Sort target monsters/enemies by pure health
 ## My Own Changelog
 <details>
 	
+	2.31
+	- Fix: TargetBoss fixed
 	2.3
 	- New: Added option to prioritize dps classes before healer classes
 	- New: Added plague class priority, no longer shared with sleep class plague priority
