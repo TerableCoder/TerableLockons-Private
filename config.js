@@ -15,19 +15,20 @@ module.exports = {
     //smartCleanse: true,  // enable mystic cleanse
     autoDps: true,     // enable dps skills
 	autoPvP: true,     // enables dps skills in pvp
-    autoDpsDelay: 50,     // auto dps Delay
+    autoDpsDelay: 10,     // auto cast Delay
     autoHeal: true,     // enable healing skills
 	targetBoss: true,     // if false, won't target bams (good for CU)
     hpCutoff: 90,       // (healing only) ignore members that have more HP% than this
     maxDistance: 35,    // in-game meters. can work up to 35m
     maxVertical: 35,     // (ignore targets at top of CS ladders, etc). can also be 35m
 	
-	maxImmersionRange: 28, // Immersion desyncs past 30 meters
+	maxImmersionRange: 33, // Immersion desyncs past 36 meters
 	maxDebuffRange: 30, // plague or sleep or VoC or contagion
 	maxDPSRange: 35, 
 	maxEStarsRange: 25, // the buff is max range 25
 	
 	// sleep prioritize this class
+	splitSleep: true, // if healer false, split fear/sleep/gyre with 2 players
 	healer: true,
 	archer: false,
 	zerk: false,
@@ -79,7 +80,13 @@ module.exports = {
 	},
 	
 	// don't lockon these people
-	blockList: {
+	blockList: { // CC && Mana Steal
+		0: [
+			"Wrong",
+			"Aleci"
+		]
+	},
+	dontDamage: {
 		0: [
 			"Wrong",
 			"Aleci"

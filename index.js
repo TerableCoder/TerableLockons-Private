@@ -4,7 +4,7 @@ const config = require('./config.js');
 module.exports = function AutoHeal(dispatch) {
     const command = Command(dispatch);
     
-    let enabled = false, // gets enabled when you log in as a healer
+    let enabled = false, // gets enabled when you log in as a healer, sorc, or archer
         debug = false,
         playerId = 0,
         gameId = 0,
@@ -17,6 +17,7 @@ module.exports = function AutoHeal(dispatch) {
         ownZ = null,
 		bossInfo = [];
 	let enemies = [];
+	let reset = false;
     
 	
     command.add('autoheal', (p1)=> {
@@ -91,9 +92,22 @@ module.exports = function AutoHeal(dispatch) {
         }        
         command.message('PvP Casting ' + (config.autoPvP ? 'enabled' : 'disabled'));
     });
-	command.add('dpsdelay', (p1)=> {
+	command.add('enable', (p1)=> {
+        if (p1 == null) {
+            enabled = !enabled;
+        } else if (p1.toLowerCase() === 'off') {
+            enabled = false;
+        } else if (p1.toLowerCase() === 'on') {
+            enabled = true;
+        } else {
+            command.message(p1 +' is an invalid argument for enable command');
+            return;
+        }        
+        command.message('Enabled ' + (enabled ? 'true' : 'false'));
+    });
+	command.add('castdelay', (p1)=> {
 		let delay = Number(p1);
-        if (delay == NaN || autoDpsDelay < 0) {
+        if (delay == NaN || delay < 0) {
             command.message(p1 +' is an invalid argument for cast command');
             return;
         } else {
@@ -156,6 +170,20 @@ module.exports = function AutoHeal(dispatch) {
             return;
         }
         command.message('Target boss ' + (config.targetBoss ? 'enabled' : 'disabled'));
+    });
+	
+	command.add('splitcc', (p1)=> {
+        if (p1 == null) {
+            config.splitSleep = !config.splitSleep;
+        } else if (p1.toLowerCase() === 'off') {
+            config.splitSleep = false;
+        } else if (p1.toLowerCase() === 'on') {
+            config.splitSleep = true;
+        } else {
+            command.message(p1 +' is an invalid argument');
+            return;
+        }
+        command.message('Split Sleep/Fear/Gyre ' + (config.splitSleep ? 'enabled' : 'disabled'));
     });
 	
 	command.add('sleep', (p1)=> {
@@ -259,30 +287,42 @@ module.exports = function AutoHeal(dispatch) {
 		if (!config.sleepyPlayers[0].includes(p1)){
 			config.sleepyPlayers[0].push(p1);
 		}
+        command.message(JSON.stringify(config.sleepyPlayers[0], null, 4));
         message(JSON.stringify(config.sleepyPlayers[0], null, 4));
     });
-	command.add('es', (p1) => {
+	command.add('dmg', (p1) => {
 		if (!config.freeStars[0].includes(p1)){
 			config.freeStars[0].push(p1);
 		}
+        command.message(JSON.stringify(config.freeStars[0], null, 4));
         message(JSON.stringify(config.freeStars[0], null, 4));
     });
 	command.add('pp', (p1) => {
 		if (!config.plaguePrio[0].includes(p1)){
 			config.plaguePrio[0].push(p1);
 		}
+        command.message(JSON.stringify(config.plaguePrio[0], null, 4));
         message(JSON.stringify(config.plaguePrio[0], null, 4));
     });
 	command.add('bl', (p1) => {
-		if (!config.blockList[0].includes(p1)){
+		if (p1 != null && !config.blockList[0].includes(p1)){
 			config.blockList[0].push(p1);
 		}
+        command.message(JSON.stringify(config.blockList[0], null, 4));
         message(JSON.stringify(config.blockList[0], null, 4));
+    });
+	command.add('dd', (p1) => {
+		if (p1 != null && !config.dontDamage[0].includes(p1)){
+			config.dontDamage[0].push(p1);
+		}
+        command.message(JSON.stringify(config.dontDamage[0], null, 4));
+        message(JSON.stringify(config.dontDamage[0], null, 4));
     });
 	command.add('dh', (p1) => {
 		if (!config.dontHeal[0].includes(p1)){
 			config.dontHeal[0].push(p1);
 		}
+        command.message(JSON.stringify(config.dontHeal[0], null, 4));
         message(JSON.stringify(config.dontHeal[0], null, 4));
     });
 	command.add('sleepyremove', (p1) => {
@@ -290,13 +330,15 @@ module.exports = function AutoHeal(dispatch) {
 		if (index > -1){
 			config.sleepyPlayers[0].splice(index, 1);
 		}
+        command.message(JSON.stringify(config.sleepyPlayers[0], null, 4));
         message(JSON.stringify(config.sleepyPlayers[0], null, 4));
     });
-	command.add('esremove', (p1) => {
+	command.add('dmgremove', (p1) => {
 		let index = config.freeStars[0].indexOf(p1);
 		if (index > -1){
 			config.freeStars[0].splice(index, 1);
 		}
+        command.message(JSON.stringify(config.freeStars[0], null, 4));
         message(JSON.stringify(config.freeStars[0], null, 4));
     });
 	command.add('ppremove', (p1) => {
@@ -304,6 +346,7 @@ module.exports = function AutoHeal(dispatch) {
 		if (index > -1){
 			config.plaguePrio[0].splice(index, 1);
 		}
+        command.message(JSON.stringify(config.plaguePrio[0], null, 4));
         message(JSON.stringify(config.plaguePrio[0], null, 4));
     });
 	command.add('blremove', (p1) => {
@@ -311,42 +354,59 @@ module.exports = function AutoHeal(dispatch) {
 		if (index > -1){
 			config.blockList[0].splice(index, 1);
 		}
+        command.message(JSON.stringify(config.blockList[0], null, 4));
         message(JSON.stringify(config.blockList[0], null, 4));
+    });
+	command.add('ddremove', (p1) => {
+		let index = config.dontDamage[0].indexOf(p1);
+		if (index > -1){
+			config.dontDamage[0].splice(index, 1);
+		}
+        command.message(JSON.stringify(config.dontDamage[0], null, 4));
+        message(JSON.stringify(config.dontDamage[0], null, 4));
     });
 	command.add('dhremove', (p1) => {
 		let index = config.dontHeal[0].indexOf(p1);
 		if (index > -1){
 			config.dontHeal[0].splice(index, 1);
 		}
+        command.message(JSON.stringify(config.dontHeal[0], null, 4));
         message(JSON.stringify(config.dontHeal[0], null, 4));
     });
 	
     command.add('tp', () => {
         sortHp();
+        command.message(JSON.stringify(partyMembers, null, 4));
         message(JSON.stringify(partyMembers, null, 4));
     });
 	command.add('tb', () => {
         sortDistBoss();
+        command.message(JSON.stringify(bossInfo, null, 4));
         message(JSON.stringify(bossInfo, null, 4));
     });
 	command.add('te', () => {
 		sortDistEnemies();
+        command.message(JSON.stringify(enemies, null, 4));
         message(JSON.stringify(enemies, null, 4));
     });
 	command.add('cp', () => {
         partyMembers = [];
+        command.message(JSON.stringify(partyMembers, null, 4));
         message(JSON.stringify(partyMembers, null, 4));
     });
 	command.add('cb', () => {
         bossInfo = [];
+        command.message(JSON.stringify(bossInfo, null, 4));
         message(JSON.stringify(bossInfo, null, 4));
     });
 	command.add('ce', () => {
         enemies = [];
+        command.message(JSON.stringify(enemies, null, 4));
         message(JSON.stringify(enemies, null, 4));
     });
 	command.add('ml', () => {
 		message("My Location");
+        command.message(JSON.stringify(playerLocation, null, 4));
         message(JSON.stringify(playerLocation, null, 4));
     });
 	
@@ -367,63 +427,6 @@ module.exports = function AutoHeal(dispatch) {
 		//message("CLEARED Enemies List");
 		
     })
-	
-	/*
-	[dispatch] handle: error running hook for S_PARTY_MEMBER_LIST<7>
-	hook: (anonymous) in let-me-autocast
-	data: { ims: true,
-	  raid: false,
-	  unk1: 3,
-	  unk2: 19478,
-	  unk3: 134,
-	  unk4: 26,
-	  leaderServerId: 26,
-	  leaderPlayerId: 3126545,
-	  unk5: 1,
-	  unk6: 1,
-	  unk7: 0,
-	  unk8: 1,
-	  unk9: 0,
-	  unk10: 1,
-	  unk11: 0,
-	  members:
-	   [ { serverId: 26,
-		   playerId: 3126545,
-		   level: 65,
-		   class: 6,
-		   online: true,
-		   gameId: [Long],
-		   order: 0,
-		   canInvite: 0,
-		   laurel: 0,
-		   awakeningLevel: 0,
-		   name: 'Wrong' },
-		 { serverId: 26,
-		   playerId: 3123637,
-		   level: 65,
-		   class: 4,
-		   online: true,
-		   gameId: [Long],
-		   order: 1,
-		   canInvite: 0,
-		   laurel: 3,
-		   awakeningLevel: 0,
-		   name: 'Roookie',
-		   loc: undefined },
-		 { serverId: 26,
-		   playerId: 1990474,
-		   level: 65,
-		   class: 8,
-		   online: true,
-		   gameId: [Long],
-		   order: 2,
-		   canInvite: 0,
-		   laurel: 0,
-		   awakeningLevel: 0,
-		   name: 'Teal' } ] }
-	error: Cannot set property 'hpP' of undefined
-		at Object.AutoHeal.dispatch.hook [as callback] (C:\Users\Kenny\Music\tera-proxy_pvp\eu cali\CaaliTeraProxy\bin\node_modules\let-me-autocast\index.js:112:28)
-	*/
 	
     dispatch.hook('S_PARTY_MEMBER_LIST', 7, (event) => {
         if (!enabled) return;
@@ -469,10 +472,15 @@ module.exports = function AutoHeal(dispatch) {
             if (partyMembers[i].gameId.equals(gameId)) {
                 partyMembers.splice(i, 1);
 				
-				if (addedMember){ // join party -> clear list
-					enemies = []; // potentially error inviting
-					//message("S_PARTY_MEMBER_LIST");
-					//message("CLEARED Enemies List");
+				if (addedMember){ // remove party members from enemies list
+					for (let j = 0; j < partyMembers.length; j++){
+						for (let k = 0; k < enemies.length; k++){
+							if (enemies[k].gameId.equals(partyMembers[j])){
+								enemies.splice(k, 1);
+								break;
+							}
+						}
+					}
 				}
 				
                 return;
@@ -685,26 +693,6 @@ module.exports = function AutoHeal(dispatch) {
         }
     })
     
-	/*
-	[dispatch] handle: error running hook for S_PARTY_MEMBER_STAT_UPDATE<3>
-	hook: (anonymous) in let-me-autocast
-	data: { serverId: 26,
-	  playerId: 3125405,
-	  curHp: 135115n,
-	  curMp: 5399,
-	  maxHp: 135115n,
-	  maxMp: 6112,
-	  level: 65,
-	  inCombat: 1,
-	  vitality: 0,
-	  alive: 1,
-	  stamina: 120,
-	  curRe: 0,
-	  maxRe: 0,
-	  unk2: 0 }
-	error: Cannot mix BigInt and other types, use explicit conversions
-		at Object.AutoHeal.dispatch.hook [as callback] (C:\Users\Kenny\Downloads\tera-proxy\bin\node_modules\let-me-autocast\index.js:200:67)
-	*/
 	
     dispatch.hook('S_PARTY_MEMBER_STAT_UPDATE', 3, (event) => {
         if (!enabled) return;
@@ -795,22 +783,7 @@ module.exports = function AutoHeal(dispatch) {
         }
     });    
     
-	/*
-	[dispatch] handle: error running hook for S_BOSS_GAGE_INFO<3>
-	hook: (anonymous) in let-me-autocast
-	data: { id: 3519330562979537n,
-	  huntingZoneId: 979,
-	  templateId: 47951,
-	  target: 72198331527996728n,
-	  unk1: 0,
-	  unk2: 1,
-	  curHp: 0n,
-	  maxHp: 1400000n,
-	  unk3: 1 }
-	error: Cannot convert a BigInt value to a number
-		at Math.round (<anonymous>)
-		at Object.AutoHeal.dispatch.hook [as callback] (C:\Users\Kenny\Downloads\tera-proxy\bin\node_modules\let-me-autocast\index.js:283:22)
-	*/
+	
 	dispatch.hook('S_BOSS_GAGE_INFO', 3, { order: -10 }, (event) => {
 
         let alreadyHaveBoss = false;
@@ -879,6 +852,22 @@ module.exports = function AutoHeal(dispatch) {
 		}
 		
     });
+	/*
+	dispatch.hook('S_CREST_MESSAGE', 2, ({type, skill}) => {
+        if (type === 6) {
+			reset = true;
+			dispatch.send('S_DUNGEON_EVENT_MESSAGE', 2, {
+                //message: `<img src="img://skill__0__${mod.game.me.templateId}__${skill}" width="48" height="48" vspace="-20"/><font size="24" color="${mod.settings.reset_font_color}">&nbsp;Reset</font>`,
+                message: `<img src="img://skill__0__${dispatch.game.me.templateId}__${skill}" width="48" height="48" vspace="-20"/><font size="24" color="#FF4500">&nbsp;Reset</font>`,
+				//type: mod.settings.flashing_notification ? 70 : 2,
+				type: 2,
+                chat: false,
+                channel: 0,
+            })
+			return false;
+		}
+    });
+	*/
 	
     dispatch.hook('C_START_SKILL', 7, (event) => {
         if (!enabled) return;
@@ -889,11 +878,14 @@ module.exports = function AutoHeal(dispatch) {
         }
         let skill = Math.floor(event.skill.id / 10000);
 		
-		let skillId = event.skill.id
+		//let skillId = event.skill.id
 		//let skillSub = event.skill.id % 100;
 		//let packetSkillInfo = config.find(o => o.group == skillInfo.group && o.job == job);
-        
-        if(config.Skills[job] && config.Skills[job].includes(skill)) {
+		
+		//reset = false;
+        //message("starting");
+        //command.message("starting");
+        if(config.Skills[job] && config.Skills[job].includes(skill)) { // heal/cleanse?
 			//command.message("Priest or mystic heal");
 			if (partyMembers.length == 0) return; // be in a party
             if (skill != 9 && !config.autoHeal) return; // skip heal if disabled
@@ -941,67 +933,127 @@ module.exports = function AutoHeal(dispatch) {
                 if (config.autoCast) {
                     setTimeout(() => {
                         dispatch.toServer('C_START_SKILL', 7, Object.assign({}, event, {w: playerLocation.w, skill: (event.skill.id + 10)}));
-                    }, 10);
+                    }, config.autoDpsDelay);
                 }
             }
+			//command.message("reset = " + reset);
+			//message("reset = " + reset);
 			//command.message("Priest or mystic heal completed!");
         } else if (job == 7 && (skill == 24 || skill == 28 || skill == 41) && bossInfo != null && bossInfo.length != 0 && config.targetBoss){ // Mystic and Volley of Curses || Sonorous Dreams || Contagion
 			// TODO
 			//command.message("Mystic lockon attacks");
             sortDistBoss();
-            if (bossInfo.length > 0 && bossInfo[0].dist <= config.maxDebuffRange) {
-				setTimeout(() => {
-					dispatch.toServer('C_CAN_LOCKON_TARGET', 3, {target: bossInfo[0].id, skill: event.skill.id});
-				}, 20);
-				
-				if (config.autoDps) {
-					setTimeout(() => {
-						dispatch.toServer('C_START_SKILL', 7, Object.assign({}, event, {w: playerLocation.w, skill: (event.skill.id + 10)}));
-					}, config.autoDpsDelay);
-				}
+			
+			let targetMembers = [];
+            let maxTargetCount = 1;
+			if (skill == 41){
+				maxTargetCount = 1;
+			} else if (skill == 28) {
+				maxTargetCount = 2;
+			} else if (skill == 24) {
+				maxTargetCount = 4;
 			}
+			
+			for (let i = 0; i < bossInfo.length; i++) { // queue ppl to lock on to
+                if (bossInfo[0].dist <= config.maxDebuffRange){
+					targetMembers.push(bossInfo[i]);
+					if (targetMembers.length == maxTargetCount) break;
+				}
+            }
+			
+			if (targetMembers.length > 0) {
+                if (debug) outputDebug(event.skill);
+                for (let i = 0; i < targetMembers.length; i++) {
+                    setTimeout(() => {
+                        dispatch.toServer('C_CAN_LOCKON_TARGET', 3, {target: targetMembers[i].id, skill: event.skill.id});
+                    }, 5);
+                }
+                
+                if (config.autoDps) {
+                    setTimeout(() => {
+                        dispatch.toServer('C_START_SKILL', 7, Object.assign({}, event, {w: playerLocation.w, skill: (event.skill.id + 10)}));
+                    }, config.autoDpsDelay);
+                }
+            }
+			
 			//command.message("Mystic lockon Completed");
 			
 		} else if (job == 6 && (skill == 30 || skill == 33 || skill == 35) && bossInfo != null && bossInfo.length != 0 && config.targetBoss){ // Priest and Plague of Exhaustion || Ishara's Lullaby || Energy Stars
 			//command.message("Priest lockon attacks");
-            sortDistBoss();
-			
-			if ((skill == 35 && (bossInfo.length > 0 && bossInfo[0].dist <= config.maxEStarsRange)) || // if estars
-			((skill == 30 || skill == 33) && (bossInfo.length > 0 && bossInfo[0].dist <= config.maxDebuffRange))){ // other dps skill
-				setTimeout(() => {
-					dispatch.toServer('C_CAN_LOCKON_TARGET', 3, {target: bossInfo[0].id, skill: event.skill.id});
-				}, 20);
-				
-				if (config.autoDps) {
-					setTimeout(() => {
-						dispatch.toServer('C_START_SKILL', 7, Object.assign({}, event, {w: playerLocation.w, skill: (event.skill.id + 10)}));
-					}, config.autoDpsDelay);
-				}
-				
-			}
-			//command.message("Priest lockon Completed");
-			
-		} else if (((job == 5 && skill == 2) || // Arrow Volley
-		(job == 4 && skill == 20)) // Flaming Barrage
-		&& bossInfo != null && config.targetBoss){ 
-			// TODO
-			//command.message("Sorc or Archer lockon");
 			sortDistBoss();
 			
-			if (bossInfo.length > 0 && bossInfo[0].dist <= config.maxDPSRange){
-				setTimeout(() => {
-					dispatch.toServer('C_CAN_LOCKON_TARGET', 3, {target: bossInfo[0].id, skill: event.skill.id});
-				}, 20);
-				
-				if (config.autoDps) {
-					setTimeout(() => {
-						dispatch.toServer('C_START_SKILL', 7, Object.assign({}, event, {w: playerLocation.w, skill: (event.skill.id + 10)}));
-					}, config.autoDpsDelay);
-				}
-				
+			let targetMembers = [];
+            let maxTargetCount = 1;
+			if (skill == 33 || skill == 35){
+				maxTargetCount = 1;
+			} else if (skill == 30) {
+				maxTargetCount = 4;
 			}
+			
+			for (let i = 0; i < bossInfo.length; i++) { // queue ppl to lock on to
+                if ((skill == 35 && (bossInfo[0].dist <= config.maxEStarsRange)) || // if estars
+                ((skill == 30 || skill == 33) && (bossInfo[0].dist <= config.maxDebuffRange))){// other dps skill
+					targetMembers.push(bossInfo[i]);
+					if (targetMembers.length == maxTargetCount) break;
+				}
+            }
+			
+			if (targetMembers.length > 0) {
+                if (debug) outputDebug(event.skill);
+                for (let i = 0; i < targetMembers.length; i++) {
+                    setTimeout(() => {
+                        dispatch.toServer('C_CAN_LOCKON_TARGET', 3, {target: targetMembers[i].id, skill: event.skill.id});
+                    }, 5);
+                }
+                
+                if (config.autoDps) {
+                    setTimeout(() => {
+                        dispatch.toServer('C_START_SKILL', 7, Object.assign({}, event, {w: playerLocation.w, skill: (event.skill.id + 10)}));
+                    }, config.autoDpsDelay);
+                }
+            }
+			
+			//command.message("Priest lockon Completed");
+			
+		} else if (((job == 5 && skill == 2) || (job == 4 && (skill == 20 || skill == 22))) && bossInfo != null && bossInfo.length != 0 && config.targetBoss){ // Arrow Volley or Flaming Barrage or Burning Breath
+			//command.message("Sorc or Archer lockon - boss");
+			//message("Sorc or Archer lockon - boss");
+			sortDistBoss();
+			
+			let targetMembers = [];
+            let maxTargetCount = 1;
+			if (skill == 22){
+				maxTargetCount = 1;
+			} else if (skill == 20) {
+				maxTargetCount = 4;
+			} else if (skill == 2) {
+				maxTargetCount = 5;
+			}
+			
+			for (let i = 0; i < bossInfo.length; i++) { // queue ppl to lock on to
+                if (bossInfo[0].dist <= config.maxDPSRange){
+					targetMembers.push(bossInfo[i]);
+					if (targetMembers.length == maxTargetCount) break;
+				}
+            }
+			
+			if (targetMembers.length > 0) {
+                if (debug) outputDebug(event.skill);
+                for (let i = 0; i < targetMembers.length; i++) {
+                    setTimeout(() => {
+                        dispatch.toServer('C_CAN_LOCKON_TARGET', 3, {target: targetMembers[i].id, skill: event.skill.id});
+                    }, 5);
+                }
+                
+                if (config.autoDps) {
+                    setTimeout(() => {
+                        dispatch.toServer('C_START_SKILL', 7, Object.assign({}, event, {w: playerLocation.w, skill: (event.skill.id + 10)}));
+                    }, config.autoDpsDelay);
+                }
+            }
+			
 			//command.message("Sorc or Archer lockon Completed");
-		} else if (job == 6 && (skill == 30) && enemies.length != 0){ // Priest and Plague of Exhaustion
+		} else if (((job == 6 && (skill == 30)) || (job == 7 && (skill == 30))) && enemies.length != 0){ // Priest and Plague of Exhaustion OR Mystic and Curse of Exhaustion
 			//command.message("Priest Lockon Enemies - Plague");
 			
 			let targetMembers = [];
@@ -1045,26 +1097,28 @@ module.exports = function AutoHeal(dispatch) {
 			
 			// look for priority dps
 			if (!config.phealer && dpsPrio || config.plaguePrioDpsBeforeHealer){ // phealer = false && a dps = true OR plaguePrioDpsBeforeHealer = true
-				for (let i = 0; i < enemies.length; i++) { // queue ppl to lock on to
-					if (enemies[i].alive == true &&
-						enemies[i].loc != undefined &&
-						(Math.abs(enemies[i].loc.z - playerLocation.loc.z) / 25) <= config.maxVertical){
-						if (enemies[i].dist <= config.maxDebuffRange) {
-							if ((config.parcher ? enemies[i].job == 5 : false) || 
-							(config.pzerk ? enemies[i].job == 3 : false) || 
-							(config.plancer ? enemies[i].job == 1 : false) || 
-							(config.pslayer ? enemies[i].job == 2 : false) || 
-							(config.psorc ? enemies[i].job == 4 : false) || 
-							(config.pwarrior ? enemies[i].job == 0 : false) || 
-							(config.preaper ? enemies[i].job == 8 : false) || 
-							(config.pgunner ? enemies[i].job == 9 : false) || 
-							(config.pbrawler ? enemies[i].job == 10 : false) || 
-							(config.pninja ? enemies[i].job == 11 : false) || 
-							(config.pvalk ? enemies[i].job == 12 : false)){
-								if (!config.blockList[0].includes(enemies[i].name)){
-									targetMembers.push(enemies[i]);
-									//command.message("Priest Enemy Added - Sleep" + (i+1));
-									if (targetMembers.length == maxTargetCount) break;
+				if (targetMembers.length < maxTargetCount){
+					for (let i = 0; i < enemies.length; i++) { // queue ppl to lock on to
+						if (enemies[i].alive == true &&
+							enemies[i].loc != undefined &&
+							(Math.abs(enemies[i].loc.z - playerLocation.loc.z) / 25) <= config.maxVertical){
+							if (enemies[i].dist <= config.maxDebuffRange) {
+								if ((config.parcher ? enemies[i].job == 5 : false) || 
+								(config.pzerk ? enemies[i].job == 3 : false) || 
+								(config.plancer ? enemies[i].job == 1 : false) || 
+								(config.pslayer ? enemies[i].job == 2 : false) || 
+								(config.psorc ? enemies[i].job == 4 : false) || 
+								(config.pwarrior ? enemies[i].job == 0 : false) || 
+								(config.preaper ? enemies[i].job == 8 : false) || 
+								(config.pgunner ? enemies[i].job == 9 : false) || 
+								(config.pbrawler ? enemies[i].job == 10 : false) || 
+								(config.pninja ? enemies[i].job == 11 : false) || 
+								(config.pvalk ? enemies[i].job == 12 : false)){
+									if (!config.blockList[0].includes(enemies[i].name)){
+										targetMembers.push(enemies[i]);
+										//command.message("Priest Enemy Added - Sleep" + (i+1));
+										if (targetMembers.length == maxTargetCount) break;
+									}
 								}
 							}
 						}
@@ -1124,19 +1178,21 @@ module.exports = function AutoHeal(dispatch) {
 			}
 			
 			// no priority target found, look for anyone
-            for (let i = 0; i < enemies.length; i++) { // queue ppl to lock on to
-                if (enemies[i].alive == true &&
-                    enemies[i].loc != undefined &&
-                    (Math.abs(enemies[i].loc.z - playerLocation.loc.z) / 25) <= config.maxVertical){
-					if (enemies[i].dist <= config.maxDebuffRange) {
-						if (!config.blockList[0].includes(enemies[i].name)){
-							targetMembers.push(enemies[i]);
-							//command.message("Priest Enemy Added - Plague" + (i+1));
-							if (targetMembers.length == maxTargetCount) break;
+			if (targetMembers.length < maxTargetCount){
+				for (let i = 0; i < enemies.length; i++) { // queue ppl to lock on to
+					if (enemies[i].alive == true &&
+						enemies[i].loc != undefined &&
+						(Math.abs(enemies[i].loc.z - playerLocation.loc.z) / 25) <= config.maxVertical){
+						if (enemies[i].dist <= config.maxDebuffRange) {
+							if (!config.blockList[0].includes(enemies[i].name)){
+								targetMembers.push(enemies[i]);
+								//command.message("Priest Enemy Added - Plague" + (i+1));
+								if (targetMembers.length == maxTargetCount) break;
+							}
 						}
 					}
 				}
-            }
+			}
 			
 			if (targetMembers.length > 0) {
                 if (debug) outputDebug(event.skill);
@@ -1149,18 +1205,30 @@ module.exports = function AutoHeal(dispatch) {
                 if (config.autoPvP) {
                     setTimeout(() => {
                         dispatch.toServer('C_START_SKILL', 7, Object.assign({}, event, {w: playerLocation.w, skill: (event.skill.id + 10)}));
-                    }, 10);
+                    }, config.autoDpsDelay);
                 }
 				//command.message("Priest Lockon Completed - Plague");
             }
 			//command.message("Priest Lockon Enemies Completed - Plague");
 			
-		} else if (job == 6 && (skill == 35) && enemies.length != 0){ // Priest and Energy Stars
+		} else if (((job == 6 && skill == 35) || // Priest and Energy Stars
+		(job == 5 && skill == 2) || // Arrow Volley
+		(job == 7 && (skill == 24 || skill == 41)) || // Volley of Curses or Contagion
+		(job == 4 && (skill == 20 || skill == 22))) // Flaming Barrage or Burning Breath
+		&& enemies.length != 0){ 
 			//command.message("Priest Lockon Enemies - eStars");
 			
 			let targetMembers = [];
             let maxTargetCount = 1;
-			
+			if (skill == 35 || skill == 22 || skill == 41){
+				maxTargetCount = 1;
+			} else if (skill == 20 || skill == 24) {
+				maxTargetCount = 4;
+			} else if (skill == 2) {
+				maxTargetCount = 5;
+			}
+			//command.message(maxTargetCount);
+			//message(maxTargetCount);
 			for (let i = 0; i < enemies.length; i++) { // calculate distance
 				enemies[i].dist = enemies[i].loc.dist3D(playerLocation.loc) / 25;
 			}
@@ -1173,8 +1241,8 @@ module.exports = function AutoHeal(dispatch) {
 						if (enemies[i].alive == true &&
 							enemies[i].loc != undefined &&
 							(Math.abs(enemies[i].loc.z - playerLocation.loc.z) / 25) <= config.maxVertical){
-							if (enemies[i].dist <= config.maxEStarsRange) {
-								if (!config.blockList[0].includes(enemies[i].name)){
+							if (((skill == 35) && enemies[i].dist <= config.maxEStarsRange) || ((skill == 2 || skill == 20 || skill == 22) && enemies[i].dist <= config.maxDPSRange) || ((skill == 24 || skill == 41) && enemies[i].dist <= config.maxDebuffRange)) {
+								if (!config.dontDamage[0].includes(enemies[i].name)){
 									targetMembers.push(enemies[i]);
 									//command.message("Priest Enemy Added - eStars" + (i+1));
 									if (targetMembers.length == maxTargetCount) break;
@@ -1184,20 +1252,21 @@ module.exports = function AutoHeal(dispatch) {
 					}
 				}
 			}
-			
-            for (let i = 0; i < enemies.length; i++) { // queue ppl to lock on to
-                if (enemies[i].alive == true &&
-                    enemies[i].loc != undefined &&
-                    (Math.abs(enemies[i].loc.z - playerLocation.loc.z) / 25) <= config.maxVertical){
-					if (enemies[i].dist <= config.maxEStarsRange) {
-						if (!config.blockList[0].includes(enemies[i].name)){
-							targetMembers.push(enemies[i]);
-							//command.message("Priest Enemy Added - eStars" + (i+1));
-							if (targetMembers.length == maxTargetCount) break;
+			if (targetMembers.length < maxTargetCount){
+				for (let i = 0; i < enemies.length; i++) { // queue ppl to lock on to
+					if (enemies[i].alive == true &&
+						enemies[i].loc != undefined &&
+						(Math.abs(enemies[i].loc.z - playerLocation.loc.z) / 25) <= config.maxVertical){
+						if (((skill == 35) && enemies[i].dist <= config.maxEStarsRange) || ((skill == 2 || skill == 20 || skill == 22) && enemies[i].dist <= config.maxDPSRange) || ((skill == 24 || skill == 41) && enemies[i].dist <= config.maxDebuffRange)) {
+							if (!config.dontDamage[0].includes(enemies[i].name)){
+								targetMembers.push(enemies[i]);
+								//command.message("Priest Enemy Added - eStars" + (i+1));
+								if (targetMembers.length == maxTargetCount) break;
+							}
 						}
 					}
 				}
-            }
+			}
 			
 			if (targetMembers.length > 0) {
                 if (debug) outputDebug(event.skill);
@@ -1210,18 +1279,23 @@ module.exports = function AutoHeal(dispatch) {
                 if (config.autoPvP) {
                     setTimeout(() => {
                         dispatch.toServer('C_START_SKILL', 7, Object.assign({}, event, {w: playerLocation.w, skill: (event.skill.id + 10)}));
-                    }, 10);
+                    }, config.autoDpsDelay);
                 }
 				
 				//command.message("Priest Lockon Completed - eStars");
             }
 			//command.message("Priest Lockon Enemies Completed - eStars");
 			
-		} else if (job == 6 && (skill == 33) && enemies.length != 0){ // Priest and Ishara's Lullaby
+		} else if (((job == 6 && (skill == 33)) || (job == 7 && (skill == 28 || skill == 31)) || (job == 4 && (skill == 25 || skill == 21 || skill == 23))) && enemies.length != 0){ // Priest and Ishara's Lullaby OR Mystic and Sonorous Dreams or Curse of Exhaustion OR Sorc and Time Gyre or Nerve Exhaustion or Mana Volley
 			//command.message("Priest Lockon Enemies - Sleep");
 			
 			let targetMembers = [];
-            let maxTargetCount = 1;
+            let maxTargetCount = 1; // eStars
+			if (!config.healer && config.splitSleep && (skill == 28 || skill == 31 || skill == 25)) { // if cc ing dps and split == true, split lockon
+				maxTargetCount = 2;
+			} else if (skill == 21 || skill == 23) { // if Nerve Exhaustion or Mana Volley
+				maxTargetCount = 4;
+			}
 			
 			for (let i = 0; i < enemies.length; i++) { // calculate distance
 				enemies[i].dist = enemies[i].loc.dist3D(playerLocation.loc) / 25;
@@ -1261,26 +1335,28 @@ module.exports = function AutoHeal(dispatch) {
 			
 			// look for priority dps
 			if (!config.healer && dpsPrio || config.sleepPrioDpsBeforeHealer){ // healer = false && a dps = true OR sleepPrioDpsBeforeHealer = true
-				for (let i = 0; i < enemies.length; i++) { // queue ppl to lock on to
-					if (enemies[i].alive == true &&
-						enemies[i].loc != undefined &&
-						(Math.abs(enemies[i].loc.z - playerLocation.loc.z) / 25) <= config.maxVertical){
-						if (enemies[i].dist <= config.maxDebuffRange) {
-							if ((config.archer ? enemies[i].job == 5 : false) || 
-							(config.zerk ? enemies[i].job == 3 : false) || 
-							(config.lancer ? enemies[i].job == 1 : false) || 
-							(config.slayer ? enemies[i].job == 2 : false) || 
-							(config.sorc ? enemies[i].job == 4 : false) || 
-							(config.warrior ? enemies[i].job == 0 : false) || 
-							(config.reaper ? enemies[i].job == 8 : false) || 
-							(config.gunner ? enemies[i].job == 9 : false) || 
-							(config.brawler ? enemies[i].job == 10 : false) || 
-							(config.ninja ? enemies[i].job == 11 : false) || 
-							(config.valk ? enemies[i].job == 12 : false)){
-								if (!config.blockList[0].includes(enemies[i].name)){
-									targetMembers.push(enemies[i]);
-									//command.message("Priest Enemy Added - Sleep" + (i+1));
-									if (targetMembers.length == maxTargetCount) break;
+				if (targetMembers.length < maxTargetCount){
+					for (let i = 0; i < enemies.length; i++) { // queue ppl to lock on to
+						if (enemies[i].alive == true &&
+							enemies[i].loc != undefined &&
+							(Math.abs(enemies[i].loc.z - playerLocation.loc.z) / 25) <= config.maxVertical){
+							if (enemies[i].dist <= config.maxDebuffRange) {
+								if ((config.archer ? enemies[i].job == 5 : false) || 
+								(config.zerk ? enemies[i].job == 3 : false) || 
+								(config.lancer ? enemies[i].job == 1 : false) || 
+								(config.slayer ? enemies[i].job == 2 : false) || 
+								(config.sorc ? enemies[i].job == 4 : false) || 
+								(config.warrior ? enemies[i].job == 0 : false) || 
+								(config.reaper ? enemies[i].job == 8 : false) || 
+								(config.gunner ? enemies[i].job == 9 : false) || 
+								(config.brawler ? enemies[i].job == 10 : false) || 
+								(config.ninja ? enemies[i].job == 11 : false) || 
+								(config.valk ? enemies[i].job == 12 : false)){
+									if (!config.blockList[0].includes(enemies[i].name)){
+										targetMembers.push(enemies[i]);
+										//command.message("Priest Enemy Added - Sleep" + (i+1));
+										if (targetMembers.length == maxTargetCount) break;
+									}
 								}
 							}
 						}
@@ -1367,7 +1443,7 @@ module.exports = function AutoHeal(dispatch) {
                 if (config.autoPvP) {
                     setTimeout(() => {
                         dispatch.toServer('C_START_SKILL', 7, Object.assign({}, event, {w: playerLocation.w, skill: (event.skill.id + 10)}));
-                    }, 10);
+                    }, config.autoDpsDelay);
                 }
 				
 				//command.message("Priest Lockon Completed - Sleep");
@@ -1375,6 +1451,8 @@ module.exports = function AutoHeal(dispatch) {
 			//command.message("Priest Lockon Enemies Completed - Sleep");
 			
 		} else {
+			//command.message(skill);
+			//message(skill);
 			//command.message("Enemies.length = " + enemies.length);
 			//command.message("bossInfo.length = " + bossInfo.length);
         }

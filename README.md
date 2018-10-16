@@ -56,9 +56,13 @@ Priority can be changed per skill to: player name > dps (if active) > healer (if
 - Toggle on/off, default is on
 ### `targetboss [on/off]`
 - Enables/disables auto-casting
+### `splitsleep` ~ if healer false, split fear/sleep/gyre with 2 players
+- Toggle on/off, default is on
+### `splitsleep [on/off]`
+- Enables/disables auto-casting
 
-### `dpsdelay [time]`
-- Set delay for all autocasts. Default delay is 50.
+### `castdelay [time]`
+- Set delay for all autocasts. Default delay is 10.
 
 ### `sleepdps`
 - Toggle on/off, default is on
@@ -71,23 +75,28 @@ Priority can be changed per skill to: player name > dps (if active) > healer (if
 - You can type 'te' to get a players' name from the proxy display(cmd) outside of game, then copy it and paste it into ingame chat.
 ### `sleepyremove [name]` ~ example: sleepyremove Wrong
 - Remove a name from the sleep priority list. You must capitalize the name the same way as it's spelled.
-### `es [name]` ~ example: es Wrong
-- Add name to E Stars priority list. You must capitalize the name the same way as it's spelled.
+### `dmg [name]` ~ example: dmg Wrong
+- Add name to eStars/Arrow Volley/Flaming Barrage/Burning Breath priority list. You must capitalize the name the same way as it's spelled.
 - You can type 'te' to get a players' name from the proxy display(cmd) outside of game, then copy it and paste it into ingame chat.
-### `esremove [name]` ~ example: esremove Wrong
-- Remove a name from the E Stars priority list. You must capitalize the name the same way as it's spelled.
+### `dmgremove [name]` ~ example: dmgremove Wrong
+- Remove a name from the eStars/Arrow Volley/Flaming Barrage/Burning Breath priority list. You must capitalize the name the same way as it's spelled.
 ### `pp [name]` ~ example: pp Wrong
 - Add name to plague priority list. You must capitalize the name the same way as it's spelled.
 - You can type 'te' to get a players' name from the proxy display(cmd) outside of game, then copy it and paste it into ingame chat.
 ### `ppremove [name]` ~ example: ppremove Wrong
 - Remove a name from the plague priority list. You must capitalize the name the same way as it's spelled.
 ### `bl [name]` ~ example: bl Wrong
-- Add name to enemy lockon block list, this makes you not lock onto them. You must capitalize the name the same way as it's spelled.
+- Add name to enemy CC lockon block list, this makes you not lock onto them. You must capitalize the name the same way as it's spelled.
 - You can type 'te' to get a players' name from the proxy display(cmd) outside of game, then copy it and paste it into ingame chat.
 ### `blremove [name]` ~ example: blremove Wrong
 - Remove a name from the plague priority list. You must capitalize the name the same way as it's spelled.
+### `dd [name]` ~ example: bl Wrong
+- Add name to enemy DMG lockon block list, this makes you not lock onto them. You must capitalize the name the same way as it's spelled.
+- You can type 'te' to get a players' name from the proxy display(cmd) outside of game, then copy it and paste it into ingame chat.
+### `ddremove [name]` ~ example: blremove Wrong
+- Remove a name from the plague priority list. You must capitalize the name the same way as it's spelled.
 ### `dh [name]` ~ example: dh Wrong
-- Add name to teammate lockon block list, this makes you not lock onto them. You must capitalize the name the same way as it's spelled.
+- Add name to teammate Heal lockon block list, this makes you not lock onto them. You must capitalize the name the same way as it's spelled.
 - You can type 'te' to get a players' name from the proxy display(cmd) outside of game, then copy it and paste it into ingame chat.
 ### `dhremove [name]` ~ example: dhremove Wrong
 - Remove a name from the plague priority list. You must capitalize the name the same way as it's spelled.
@@ -119,6 +128,19 @@ TODO: Sort target monsters/enemies by pure health
 ## My Own Changelog
 <details>
 	
+	- TODO: Try to force immersion reset, again - first try failed
+	- TODO: Let it target mobs
+	- TODO: Let it target both bams and players
+	- TODO: Make increase max target number glyphs actually work
+	- TODO: Rewrite the code so it doesn't look like ass
+	- TODO: Make there be a timeout so that if an enemy hasn't been seen in a long time we remove them from the enemy list
+	- TODO: Sell, or massively distribute, to every proxy supported region to kill pvp on it
+	2.4
+	- Edit: Seperated block list for attack skills and CC skills
+	- New: Added support for every lockon on every class(priest, mystic, sorc, archer)
+	- New: Added option to split sleep, if healer false and splitSleep true, split fear/sleep/gyre with 2 players
+	- Fix: Made adding a player to the party not clear the enemies list, instead it removes the added players from the enemies list
+	- Fix: PvE lockons work on multiple bosses
 	2.31
 	- Fix: TargetBoss fixed
 	2.3
@@ -161,8 +183,9 @@ TODO: Sort target monsters/enemies by pure health
 	S_LOGOUT_PARTY_MEMBER 1
 	S_BAN_PARTY_MEMBER 1
 	S_BOSS_GAGE_INFO 3
-	S_ACTION_STAGE 7 ~ 8 on patch 75
+	S_ACTION_STAGE 8
 	C_START_SKILL 7
+	C_CAN_LOCKON_TARGET 3
 	S_CREST_INFO 2
 	S_CREST_APPLY 2
 	
