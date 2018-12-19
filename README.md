@@ -135,6 +135,8 @@ TODO: Sort target monsters/enemies by pure health
 	- TODO: Rewrite the code so it doesn't look like ass
 	- TODO: Make there be a timeout so that if an enemy hasn't been seen in a long time we remove them from the enemy list
 	- TODO: Sell, or massively distribute, to every proxy supported region to kill pvp on it
+	2.41
+	- Fixed for patch 77 and new proxy
 	2.4
 	- Edit: Seperated block list for attack skills and CC skills
 	- New: Added support for every lockon on every class(priest, mystic, sorc, archer)

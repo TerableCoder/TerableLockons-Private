@@ -1,8 +1,8 @@
-const Command = require('command');
+//const Command = require('command');
 const config = require('./config.js');
     
-module.exports = function AutoHeal(dispatch) {
-    const command = Command(dispatch);
+module.exports = function LetMeAutocast(dispatch) {
+    //const dispatch.command = dispatch.command(dispatch);
     
     let enabled = false, // gets enabled when you log in as a healer, sorc, or archer
         debug = false,
@@ -18,9 +18,31 @@ module.exports = function AutoHeal(dispatch) {
 		bossInfo = [];
 	let enemies = [];
 	let reset = false;
+	const RagnarokId = 10155130;
+    const GROW_ID = 7000005;
+    const stack = 10;
+    const stackSmall = 5;
+    const duration = 30000;
+	let buffGrow = true;
+	let buffPartyMemberGrow = false;
+	/*
+	valk 25/28.75
+	sorc 20/24
+	war 20/24
+	reaper 15/19.5
+	slayer 20
+	lancer 20
+	zerk 30
+	ninja 24
+	brawler basically infinite
+	priest kaias+gs maybe
+	mystic corruption ring maybe
+	
+	add another thing for GS/Tenacity/Mocking Shout
+	*/
     
 	
-    command.add('autoheal', (p1)=> {
+    dispatch.command.add('autoheal', (p1)=> {
         if (p1 == null) {
             config.autoHeal = !config.autoHeal;
         } else if (p1.toLowerCase() === 'off') {
@@ -29,18 +51,18 @@ module.exports = function AutoHeal(dispatch) {
             config.autoHeal = true;
         } else if (p1.toLowerCase() === 'debug') {
             debug = !debug;
-            command.message('Debug ' + (debug ? 'enabled' : 'disabled'));
+            dispatch.command.message('Debug ' + (debug ? 'enabled' : 'disabled'));
             return;
         } else if (!isNaN(p1)) {
             config.autoHeal = true;
             config.hpCutoff = (p1 < 0 ? 0 : p1 > 100 ? 100 : p1);
         } else {
-            command.message(p1 +' is an invalid argument');
+            dispatch.command.message(p1 +' is an invalid argument');
             return;
         }        
-        command.message('Healing ' + (config.autoHeal ? 'enabled (' + config.hpCutoff + '%)' : 'disabled'));
+        dispatch.command.message('Healing ' + (config.autoHeal ? 'enabled (' + config.hpCutoff + '%)' : 'disabled'));
     });
-    command.add('autocleanse', (p1) => {
+    dispatch.command.add('autocleanse', (p1) => {
         if (p1 == null) {
             config.autoCleanse = !config.autoCleanse;
         } else if (p1.toLowerCase() === 'off') {
@@ -48,12 +70,12 @@ module.exports = function AutoHeal(dispatch) {
         } else if (p1.toLowerCase() === 'on') {
             config.autoCleanse = true;
         } else {
-            command.message(p1 +' is an invalid argument for cleanse command');
+            dispatch.command.message(p1 +' is an invalid argument for cleanse dispatch.command');
             return;
         }
-        command.message('Cleansing ' + (config.autoCleanse ? 'enabled' : 'disabled'));
+        dispatch.command.message('Cleansing ' + (config.autoCleanse ? 'enabled' : 'disabled'));
     });
-    command.add('autocast', (p1)=> {
+    dispatch.command.add('autocast', (p1)=> {
         if (p1 == null) {
             config.autoCast = !config.autoCast;
         } else if (p1.toLowerCase() === 'off') {
@@ -61,12 +83,12 @@ module.exports = function AutoHeal(dispatch) {
         } else if (p1.toLowerCase() === 'on') {
             config.autoCast = true;
         } else {
-            command.message(p1 +' is an invalid argument for cast command');
+            dispatch.command.message(p1 +' is an invalid argument for cast dispatch.command');
             return;
         }        
-        command.message('Heal Casting ' + (config.autoCast ? 'enabled' : 'disabled'));
+        dispatch.command.message('Heal Casting ' + (config.autoCast ? 'enabled' : 'disabled'));
     });
-	command.add('autodps', (p1)=> {
+	dispatch.command.add('autodps', (p1)=> {
         if (p1 == null) {
             config.autoDps = !config.autoDps;
         } else if (p1.toLowerCase() === 'off') {
@@ -74,12 +96,12 @@ module.exports = function AutoHeal(dispatch) {
         } else if (p1.toLowerCase() === 'on') {
             config.autoDps = true;
         } else {
-            command.message(p1 +' is an invalid argument for cast command');
+            dispatch.command.message(p1 +' is an invalid argument for cast dispatch.command');
             return;
         }        
-        command.message('PvE Casting ' + (config.autoDps ? 'enabled' : 'disabled'));
+        dispatch.command.message('PvE Casting ' + (config.autoDps ? 'enabled' : 'disabled'));
     });
-	command.add('autopvp', (p1)=> {
+	dispatch.command.add('autopvp', (p1)=> {
         if (p1 == null) {
             config.autoPvP = !config.autoPvP;
         } else if (p1.toLowerCase() === 'off') {
@@ -87,12 +109,12 @@ module.exports = function AutoHeal(dispatch) {
         } else if (p1.toLowerCase() === 'on') {
             config.autoPvP = true;
         } else {
-            command.message(p1 +' is an invalid argument for cast command');
+            dispatch.command.message(p1 +' is an invalid argument for cast dispatch.command');
             return;
         }        
-        command.message('PvP Casting ' + (config.autoPvP ? 'enabled' : 'disabled'));
+        dispatch.command.message('PvP Casting ' + (config.autoPvP ? 'enabled' : 'disabled'));
     });
-	command.add('enable', (p1)=> {
+	dispatch.command.add('enable', (p1)=> {
         if (p1 == null) {
             enabled = !enabled;
         } else if (p1.toLowerCase() === 'off') {
@@ -100,23 +122,23 @@ module.exports = function AutoHeal(dispatch) {
         } else if (p1.toLowerCase() === 'on') {
             enabled = true;
         } else {
-            command.message(p1 +' is an invalid argument for enable command');
+            dispatch.command.message(p1 +' is an invalid argument for enable dispatch.command');
             return;
         }        
-        command.message('Enabled ' + (enabled ? 'true' : 'false'));
+        dispatch.command.message('Enabled ' + (enabled ? 'true' : 'false'));
     });
-	command.add('castdelay', (p1)=> {
+	dispatch.command.add('castdelay', (p1)=> {
 		let delay = Number(p1);
         if (delay == NaN || delay < 0) {
-            command.message(p1 +' is an invalid argument for cast command');
+            dispatch.command.message(p1 +' is an invalid argument for cast dispatch.command');
             return;
         } else {
             config.autoDpsDelay = delay;
         }        
-        command.message('Casting Delay ' + config.autoDpsDelay);
+        dispatch.command.message('Casting Delay ' + config.autoDpsDelay);
     });
 	
-	command.add('sleepdps', (p1)=> {
+	dispatch.command.add('sleepdps', (p1)=> {
         if (p1 == null) {
             config.sleepPrioDpsBeforeHealer = !config.sleepPrioDpsBeforeHealer;
         } else if (p1.toLowerCase() === 'off') {
@@ -124,13 +146,13 @@ module.exports = function AutoHeal(dispatch) {
         } else if (p1.toLowerCase() === 'on') {
             config.sleepPrioDpsBeforeHealer = true;
         } else {
-            command.message(p1 +' is an invalid argument');
+            dispatch.command.message(p1 +' is an invalid argument');
             return;
         }
-        command.message('Sleep Priority Dps Before Priority Healer ' + (config.sleepPrioDpsBeforeHealer ? 'enabled' : 'disabled'));
+        dispatch.command.message('Sleep Priority Dps Before Priority Healer ' + (config.sleepPrioDpsBeforeHealer ? 'enabled' : 'disabled'));
     });
 	/*
-	command.add('esdps', (p1)=> {
+	dispatch.command.add('esdps', (p1)=> {
         if (p1 == null) {
             config.eStarsPrioDpsBeforeHealer = !config.eStarsPrioDpsBeforeHealer;
         } else if (p1.toLowerCase() === 'off') {
@@ -138,13 +160,13 @@ module.exports = function AutoHeal(dispatch) {
         } else if (p1.toLowerCase() === 'on') {
             config.eStarsPrioDpsBeforeHealer = true;
         } else {
-            command.message(p1 +' is an invalid argument');
+            dispatch.command.message(p1 +' is an invalid argument');
             return;
         }
-        command.message('E Stars Priority Dps Before Priority Healer ' + (config.eStarsPrioDpsBeforeHealer ? 'enabled' : 'disabled'));
+        dispatch.command.message('E Stars Priority Dps Before Priority Healer ' + (config.eStarsPrioDpsBeforeHealer ? 'enabled' : 'disabled'));
     });
 	*/
-	command.add('ppdps', (p1)=> {
+	dispatch.command.add('ppdps', (p1)=> {
         if (p1 == null) {
             config.plaguePrioDpsBeforeHealer = !config.plaguePrioDpsBeforeHealer;
         } else if (p1.toLowerCase() === 'off') {
@@ -152,13 +174,13 @@ module.exports = function AutoHeal(dispatch) {
         } else if (p1.toLowerCase() === 'on') {
             config.plaguePrioDpsBeforeHealer = true;
         } else {
-            command.message(p1 +' is an invalid argument');
+            dispatch.command.message(p1 +' is an invalid argument');
             return;
         }
-        command.message('Plague Priority Dps Before Priority Healer ' + (config.plaguePrioDpsBeforeHealer ? 'enabled' : 'disabled'));
+        dispatch.command.message('Plague Priority Dps Before Priority Healer ' + (config.plaguePrioDpsBeforeHealer ? 'enabled' : 'disabled'));
     });
 	
-	command.add('targetboss', (p1)=> {
+	dispatch.command.add('targetboss', (p1)=> {
         if (p1 == null) {
             config.targetBoss = !config.targetBoss;
         } else if (p1.toLowerCase() === 'off') {
@@ -166,13 +188,13 @@ module.exports = function AutoHeal(dispatch) {
         } else if (p1.toLowerCase() === 'on') {
             config.targetBoss = true;
         } else {
-            command.message(p1 +' is an invalid argument');
+            dispatch.command.message(p1 +' is an invalid argument');
             return;
         }
-        command.message('Target boss ' + (config.targetBoss ? 'enabled' : 'disabled'));
+        dispatch.command.message('Target boss ' + (config.targetBoss ? 'enabled' : 'disabled'));
     });
 	
-	command.add('splitcc', (p1)=> {
+	dispatch.command.add('splitcc', (p1)=> {
         if (p1 == null) {
             config.splitSleep = !config.splitSleep;
         } else if (p1.toLowerCase() === 'off') {
@@ -180,233 +202,233 @@ module.exports = function AutoHeal(dispatch) {
         } else if (p1.toLowerCase() === 'on') {
             config.splitSleep = true;
         } else {
-            command.message(p1 +' is an invalid argument');
+            dispatch.command.message(p1 +' is an invalid argument');
             return;
         }
-        command.message('Split Sleep/Fear/Gyre ' + (config.splitSleep ? 'enabled' : 'disabled'));
+        dispatch.command.message('Split Sleep/Fear/Gyre ' + (config.splitSleep ? 'enabled' : 'disabled'));
     });
 	
-	command.add('sleep', (p1)=> {
+	dispatch.command.add('sleepa', (p1)=> {
         if (p1 == null) {
-            command.message(p1 +' is an invalid argument');
+            dispatch.command.message(p1 +' is an invalid argument');
 			return;
         }
 		p1 = p1.toLowerCase();
 		
 		if (p1 == 'healer'){
 			config.healer = !config.healer;
-			command.message('Sleep Priority ' + p1 + ' = ' + (config.healer ? 'enabled' : 'disabled'));
+			dispatch.command.message('Sleep Priority ' + p1 + ' = ' + (config.healer ? 'enabled' : 'disabled'));
 		} else if (p1 == 'archer') {
 			config.archer = !config.archer;
-			command.message('Sleep Priority ' + p1 + ' = ' + (config.archer ? 'enabled' : 'disabled'));
+			dispatch.command.message('Sleep Priority ' + p1 + ' = ' + (config.archer ? 'enabled' : 'disabled'));
         } else if (p1 == 'zerk'){
 			config.zerk = !config.zerk;
-			command.message('Sleep Priority ' + p1 + ' = ' + (config.zerk ? 'enabled' : 'disabled'));
+			dispatch.command.message('Sleep Priority ' + p1 + ' = ' + (config.zerk ? 'enabled' : 'disabled'));
 		} else if (p1 == 'lancer'){
 			config.lancer = !config.lancer;
-			command.message('Sleep Priority ' + p1 + ' = ' + (config.lancer ? 'enabled' : 'disabled'));
+			dispatch.command.message('Sleep Priority ' + p1 + ' = ' + (config.lancer ? 'enabled' : 'disabled'));
 		} else if (p1 == 'slayer'){
 			config.slayer = !config.slayer;
-			command.message('Sleep Priority ' + p1 + ' = ' + (config.slayer ? 'enabled' : 'disabled'));
+			dispatch.command.message('Sleep Priority ' + p1 + ' = ' + (config.slayer ? 'enabled' : 'disabled'));
 		} else if (p1 == 'sorc'){
 			config.sorc = !config.sorc;
-			command.message('Sleep Priority ' + p1 + ' = ' + (config.sorc ? 'enabled' : 'disabled'));
+			dispatch.command.message('Sleep Priority ' + p1 + ' = ' + (config.sorc ? 'enabled' : 'disabled'));
 		} else if (p1 == 'warrior'){
 			config.warrior = !config.warrior;
-			command.message('Sleep Priority ' + p1 + ' = ' + (config.warrior ? 'enabled' : 'disabled'));
+			dispatch.command.message('Sleep Priority ' + p1 + ' = ' + (config.warrior ? 'enabled' : 'disabled'));
 		} else if (p1 == 'reaper'){
 			config.reaper = !config.reaper;
-			command.message('Sleep Priority ' + p1 + ' = ' + (config.reaper ? 'enabled' : 'disabled'));
+			dispatch.command.message('Sleep Priority ' + p1 + ' = ' + (config.reaper ? 'enabled' : 'disabled'));
 		} else if (p1 == 'gunner'){
 			config.gunner = !config.gunner;
-			command.message('Sleep Priority ' + p1 + ' = ' + (config.gunner ? 'enabled' : 'disabled'));
+			dispatch.command.message('Sleep Priority ' + p1 + ' = ' + (config.gunner ? 'enabled' : 'disabled'));
 		} else if (p1 == 'brawler'){
 			config.brawler = !config.brawler;
-			command.message('Sleep Priority ' + p1 + ' = ' + (config.brawler ? 'enabled' : 'disabled'));
+			dispatch.command.message('Sleep Priority ' + p1 + ' = ' + (config.brawler ? 'enabled' : 'disabled'));
 		} else if (p1 == 'ninja'){
 			config.ninja = !config.ninja;
-			command.message('Sleep Priority ' + p1 + ' = ' + (config.ninja ? 'enabled' : 'disabled'));
+			dispatch.command.message('Sleep Priority ' + p1 + ' = ' + (config.ninja ? 'enabled' : 'disabled'));
 		} else if (p1 == 'valk'){
 			config.valk = !config.valk;
-			command.message('Sleep Priority ' + p1 + ' = ' + (config.valk ? 'enabled' : 'disabled'));	
+			dispatch.command.message('Sleep Priority ' + p1 + ' = ' + (config.valk ? 'enabled' : 'disabled'));	
 		} else {
-            command.message(p1 +' is an invalid argument');
+            dispatch.command.message(p1 +' is an invalid argument');
             return;
         }
     });
-	command.add('plague', (p1)=> {
+	dispatch.command.add('plague', (p1)=> {
         if (p1 == null) {
-            command.message(p1 +' is an invalid argument');
+            dispatch.command.message(p1 +' is an invalid argument');
 			return;
         }
 		p1 = p1.toLowerCase();
 		
 		if (p1 == 'healer'){
 			config.phealer = !config.phealer;
-			command.message('Sleep Priority ' + p1 + ' = ' + (config.healer ? 'enabled' : 'disabled'));
+			dispatch.command.message('Plague Priority ' + p1 + ' = ' + (config.phealer ? 'enabled' : 'disabled'));
 		} else if (p1 == 'archer') {
 			config.parcher = !config.parcher;
-			command.message('Sleep Priority ' + p1 + ' = ' + (config.archer ? 'enabled' : 'disabled'));
+			dispatch.command.message('Plague Priority ' + p1 + ' = ' + (config.parcher ? 'enabled' : 'disabled'));
         } else if (p1 == 'zerk'){
 			config.pzerk = !config.pzerk;
-			command.message('Sleep Priority ' + p1 + ' = ' + (config.zerk ? 'enabled' : 'disabled'));
+			dispatch.command.message('Plague Priority ' + p1 + ' = ' + (config.pzerk ? 'enabled' : 'disabled'));
 		} else if (p1 == 'lancer'){
 			config.plancer = !config.plancer;
-			command.message('Sleep Priority ' + p1 + ' = ' + (config.lancer ? 'enabled' : 'disabled'));
+			dispatch.command.message('Plague Priority ' + p1 + ' = ' + (config.plancer ? 'enabled' : 'disabled'));
 		} else if (p1 == 'slayer'){
 			config.pslayer = !config.pslayer;
-			command.message('Sleep Priority ' + p1 + ' = ' + (config.slayer ? 'enabled' : 'disabled'));
+			dispatch.command.message('Plague Priority ' + p1 + ' = ' + (config.pslayer ? 'enabled' : 'disabled'));
 		} else if (p1 == 'sorc'){
 			config.psorc = !config.psorc;
-			command.message('Sleep Priority ' + p1 + ' = ' + (config.sorc ? 'enabled' : 'disabled'));
+			dispatch.command.message('Plague Priority ' + p1 + ' = ' + (config.psorc ? 'enabled' : 'disabled'));
 		} else if (p1 == 'warrior'){
 			config.pwarrior = !config.pwarrior;
-			command.message('Sleep Priority ' + p1 + ' = ' + (config.warrior ? 'enabled' : 'disabled'));
+			dispatch.command.message('Plague Priority ' + p1 + ' = ' + (config.pwarrior ? 'enabled' : 'disabled'));
 		} else if (p1 == 'reaper'){
 			config.preaper = !config.preaper;
-			command.message('Sleep Priority ' + p1 + ' = ' + (config.reaper ? 'enabled' : 'disabled'));
+			dispatch.command.message('Plague Priority ' + p1 + ' = ' + (config.preaper ? 'enabled' : 'disabled'));
 		} else if (p1 == 'gunner'){
 			config.pgunner = !config.pgunner;
-			command.message('Sleep Priority ' + p1 + ' = ' + (config.gunner ? 'enabled' : 'disabled'));
+			dispatch.command.message('Plague Priority ' + p1 + ' = ' + (config.pgunner ? 'enabled' : 'disabled'));
 		} else if (p1 == 'brawler'){
 			config.pbrawler = !config.pbrawler;
-			command.message('Sleep Priority ' + p1 + ' = ' + (config.brawler ? 'enabled' : 'disabled'));
+			dispatch.command.message('Plague Priority ' + p1 + ' = ' + (config.pbrawler ? 'enabled' : 'disabled'));
 		} else if (p1 == 'ninja'){
 			config.pninja = !config.pninja;
-			command.message('Sleep Priority ' + p1 + ' = ' + (config.ninja ? 'enabled' : 'disabled'));
+			dispatch.command.message('Plague Priority ' + p1 + ' = ' + (config.pninja ? 'enabled' : 'disabled'));
 		} else if (p1 == 'valk'){
 			config.pvalk = !config.pvalk;
-			command.message('Sleep Priority ' + p1 + ' = ' + (config.valk ? 'enabled' : 'disabled'));	
+			dispatch.command.message('Plague Priority ' + p1 + ' = ' + (config.pvalk ? 'enabled' : 'disabled'));	
 		} else {
-            command.message(p1 +' is an invalid argument');
+            dispatch.command.message(p1 +' is an invalid argument');
             return;
         }
     });
 	
-    command.add('sleepy', (p1) => {
+    dispatch.command.add('sleepy', (p1) => {
 		if (!config.sleepyPlayers[0].includes(p1)){
 			config.sleepyPlayers[0].push(p1);
 		}
-        command.message(JSON.stringify(config.sleepyPlayers[0], null, 4));
+        dispatch.command.message(JSON.stringify(config.sleepyPlayers[0], null, 4));
         message(JSON.stringify(config.sleepyPlayers[0], null, 4));
     });
-	command.add('dmg', (p1) => {
+	dispatch.command.add('dmgadd', (p1) => {
 		if (!config.freeStars[0].includes(p1)){
 			config.freeStars[0].push(p1);
 		}
-        command.message(JSON.stringify(config.freeStars[0], null, 4));
+        dispatch.command.message(JSON.stringify(config.freeStars[0], null, 4));
         message(JSON.stringify(config.freeStars[0], null, 4));
     });
-	command.add('pp', (p1) => {
+	dispatch.command.add('pp', (p1) => {
 		if (!config.plaguePrio[0].includes(p1)){
 			config.plaguePrio[0].push(p1);
 		}
-        command.message(JSON.stringify(config.plaguePrio[0], null, 4));
+        dispatch.command.message(JSON.stringify(config.plaguePrio[0], null, 4));
         message(JSON.stringify(config.plaguePrio[0], null, 4));
     });
-	command.add('bl', (p1) => {
+	dispatch.command.add('bl', (p1) => {
 		if (p1 != null && !config.blockList[0].includes(p1)){
 			config.blockList[0].push(p1);
 		}
-        command.message(JSON.stringify(config.blockList[0], null, 4));
+        dispatch.command.message(JSON.stringify(config.blockList[0], null, 4));
         message(JSON.stringify(config.blockList[0], null, 4));
     });
-	command.add('dd', (p1) => {
+	dispatch.command.add('dd', (p1) => {
 		if (p1 != null && !config.dontDamage[0].includes(p1)){
 			config.dontDamage[0].push(p1);
 		}
-        command.message(JSON.stringify(config.dontDamage[0], null, 4));
+        dispatch.command.message(JSON.stringify(config.dontDamage[0], null, 4));
         message(JSON.stringify(config.dontDamage[0], null, 4));
     });
-	command.add('dh', (p1) => {
+	dispatch.command.add('dh', (p1) => {
 		if (!config.dontHeal[0].includes(p1)){
 			config.dontHeal[0].push(p1);
 		}
-        command.message(JSON.stringify(config.dontHeal[0], null, 4));
+        dispatch.command.message(JSON.stringify(config.dontHeal[0], null, 4));
         message(JSON.stringify(config.dontHeal[0], null, 4));
     });
-	command.add('sleepyremove', (p1) => {
+	dispatch.command.add('sleepyremove', (p1) => {
 		let index = config.sleepyPlayers[0].indexOf(p1);
 		if (index > -1){
 			config.sleepyPlayers[0].splice(index, 1);
 		}
-        command.message(JSON.stringify(config.sleepyPlayers[0], null, 4));
+        dispatch.command.message(JSON.stringify(config.sleepyPlayers[0], null, 4));
         message(JSON.stringify(config.sleepyPlayers[0], null, 4));
     });
-	command.add('dmgremove', (p1) => {
+	dispatch.command.add('dmgremove', (p1) => {
 		let index = config.freeStars[0].indexOf(p1);
 		if (index > -1){
 			config.freeStars[0].splice(index, 1);
 		}
-        command.message(JSON.stringify(config.freeStars[0], null, 4));
+        dispatch.command.message(JSON.stringify(config.freeStars[0], null, 4));
         message(JSON.stringify(config.freeStars[0], null, 4));
     });
-	command.add('ppremove', (p1) => {
+	dispatch.command.add('ppremove', (p1) => {
 		let index = config.plaguePrio[0].indexOf(p1);
 		if (index > -1){
 			config.plaguePrio[0].splice(index, 1);
 		}
-        command.message(JSON.stringify(config.plaguePrio[0], null, 4));
+        dispatch.command.message(JSON.stringify(config.plaguePrio[0], null, 4));
         message(JSON.stringify(config.plaguePrio[0], null, 4));
     });
-	command.add('blremove', (p1) => {
+	dispatch.command.add('blremove', (p1) => {
 		let index = config.blockList[0].indexOf(p1);
 		if (index > -1){
 			config.blockList[0].splice(index, 1);
 		}
-        command.message(JSON.stringify(config.blockList[0], null, 4));
+        dispatch.command.message(JSON.stringify(config.blockList[0], null, 4));
         message(JSON.stringify(config.blockList[0], null, 4));
     });
-	command.add('ddremove', (p1) => {
+	dispatch.command.add('ddremove', (p1) => {
 		let index = config.dontDamage[0].indexOf(p1);
 		if (index > -1){
 			config.dontDamage[0].splice(index, 1);
 		}
-        command.message(JSON.stringify(config.dontDamage[0], null, 4));
+        dispatch.command.message(JSON.stringify(config.dontDamage[0], null, 4));
         message(JSON.stringify(config.dontDamage[0], null, 4));
     });
-	command.add('dhremove', (p1) => {
+	dispatch.command.add('dhremove', (p1) => {
 		let index = config.dontHeal[0].indexOf(p1);
 		if (index > -1){
 			config.dontHeal[0].splice(index, 1);
 		}
-        command.message(JSON.stringify(config.dontHeal[0], null, 4));
+        dispatch.command.message(JSON.stringify(config.dontHeal[0], null, 4));
         message(JSON.stringify(config.dontHeal[0], null, 4));
     });
 	
-    command.add('tp', () => {
+    dispatch.command.add('tp', () => {
         sortHp();
-        command.message(JSON.stringify(partyMembers, null, 4));
+        dispatch.command.message(JSON.stringify(partyMembers, null, 4));
         message(JSON.stringify(partyMembers, null, 4));
     });
-	command.add('tb', () => {
+	dispatch.command.add('tb', () => {
         sortDistBoss();
-        command.message(JSON.stringify(bossInfo, null, 4));
+        dispatch.command.message(JSON.stringify(bossInfo, null, 4));
         message(JSON.stringify(bossInfo, null, 4));
     });
-	command.add('te', () => {
+	dispatch.command.add('te', () => {
 		sortDistEnemies();
-        command.message(JSON.stringify(enemies, null, 4));
+        dispatch.command.message(JSON.stringify(enemies, null, 4));
         message(JSON.stringify(enemies, null, 4));
     });
-	command.add('cp', () => {
+	dispatch.command.add('cp', () => {
         partyMembers = [];
-        command.message(JSON.stringify(partyMembers, null, 4));
+        dispatch.command.message(JSON.stringify(partyMembers, null, 4));
         message(JSON.stringify(partyMembers, null, 4));
     });
-	command.add('cb', () => {
+	dispatch.command.add('cb', () => {
         bossInfo = [];
-        command.message(JSON.stringify(bossInfo, null, 4));
+        dispatch.command.message(JSON.stringify(bossInfo, null, 4));
         message(JSON.stringify(bossInfo, null, 4));
     });
-	command.add('ce', () => {
+	dispatch.command.add('ce', () => {
         enemies = [];
-        command.message(JSON.stringify(enemies, null, 4));
+        dispatch.command.message(JSON.stringify(enemies, null, 4));
         message(JSON.stringify(enemies, null, 4));
     });
-	command.add('ml', () => {
+	dispatch.command.add('ml', () => {
 		message("My Location");
-        command.message(JSON.stringify(playerLocation, null, 4));
+        dispatch.command.message(JSON.stringify(playerLocation, null, 4));
         message(JSON.stringify(playerLocation, null, 4));
     });
 	
@@ -442,13 +464,14 @@ module.exports = function AutoHeal(dispatch) {
         for (let i = 0; i < event.members.length; i++) {
             for (let j = 0; j < partyMembers.length; j++) {
                 if (partyMembers[j]) {
-                    if (event.members[i].gameId.equals(partyMembers[j].gameId)) {
+                    //if (event.members[i].gameId.equals(partyMembers[j].gameId)) {
+                    if (event.members[i].gameId == (partyMembers[j].gameId)) {
                         event.members[i].loc = partyMembers[j].loc;
                         event.members[i].hpP = partyMembers[j].hpP;
 						
 						/*
 						if (isNaN(partyMembers[j].hpP) || partyMembers[j].hpP == undefined || partyMembers[j].hpP == null && partyMembers[j].hpP > 100){
-							command.message("S_PARTY_MEMBER_LIST, " + partyMembers[i].playerId + " HP = " + partyMembers[j].hpP);
+							dispatch.command.message("S_PARTY_MEMBER_LIST, " + partyMembers[i].playerId + " HP = " + partyMembers[j].hpP);
 						}
 						*/
 						
@@ -459,7 +482,7 @@ module.exports = function AutoHeal(dispatch) {
 							event.members[i].hpP = partyMembers[j].hpP;
 						} else {
 							event.members[i].hpP = 100;
-							command.message("S_PARTY_MEMBER_LIST, " + partyMembers[i].playerId + " HP = " + asd);
+							dispatch.command.message("S_PARTY_MEMBER_LIST, " + partyMembers[i].playerId + " HP = " + asd);
 						}
 						*/
                     }
@@ -469,13 +492,15 @@ module.exports = function AutoHeal(dispatch) {
         partyMembers = event.members;
         // remove self from targets
         for (let i = 0; i < partyMembers.length; i++) {
-            if (partyMembers[i].gameId.equals(gameId)) {
+           // if (partyMembers[i].gameId.equals(gameId)) {
+            if (partyMembers[i].gameId == (gameId)) {
                 partyMembers.splice(i, 1);
 				
 				if (addedMember){ // remove party members from enemies list
 					for (let j = 0; j < partyMembers.length; j++){
 						for (let k = 0; k < enemies.length; k++){
-							if (enemies[k].gameId.equals(partyMembers[j])){
+							//if (enemies[k].gameId.equals(partyMembers[j].gameId)){
+							if (enemies[k].gameId == (partyMembers[j].gameId)){
 								enemies.splice(k, 1);
 								break;
 							}
@@ -523,7 +548,8 @@ module.exports = function AutoHeal(dispatch) {
         if (!enabled) return;
         if (partyMembers.length != 0) {
             for (let i = 0; i < partyMembers.length; i++) {
-                if (partyMembers[i].gameId.equals(event.gameId)) {
+                //if (partyMembers[i].gameId.equals(event.gameId)) {
+                if (partyMembers[i].gameId == (event.gameId)) {
                     partyMembers[i].loc = event.loc;
                     partyMembers[i].hpP = (event.alive ? 100 : 0);
                     return;
@@ -534,7 +560,8 @@ module.exports = function AutoHeal(dispatch) {
 		let theirClass = (event.templateId - 10101) % 100;
 		// if enemy, update them
 		for (let i = 0; i < enemies.length; i++) {
-			if (enemies[i].gameId.equals(event.gameId)) {
+			//if (enemies[i].gameId.equals(event.gameId)) {
+			if (enemies[i].gameId == (event.gameId)) {
 				enemies[i].loc = event.loc;
 				enemies[i].alive = event.alive;
 				enemies[i].job = theirClass;
@@ -548,9 +575,11 @@ module.exports = function AutoHeal(dispatch) {
 			loc: event.loc,
 			w: event.w,
 			alive: event.alive,
-			dist: 99999999,
+			dist: Number(99999999),
 			job: theirClass,
-			name: event.name
+			name: event.name,
+			classBufffed: false,
+			stunImmune: false
 		}
 		enemies.push(tempPushEvent);
 	
@@ -563,7 +592,8 @@ module.exports = function AutoHeal(dispatch) {
     dispatch.hook('S_USER_LOCATION', 5, (event) => {
         if (!enabled) return;
         for (let i = 0; i < partyMembers.length; i++) {
-            if (partyMembers[i].gameId.equals(event.gameId)) {
+            //if (partyMembers[i].gameId.equals(event.gameId)) {
+            if (partyMembers[i].gameId == (event.gameId)) {
                 partyMembers[i].loc = event.loc;
                 return;
             }
@@ -572,7 +602,8 @@ module.exports = function AutoHeal(dispatch) {
 		
 		// if enemy, update them
 		for (let i = 0; i < enemies.length; i++) {
-			if (enemies[i].gameId.equals(event.gameId)) {
+			//if (enemies[i].gameId.equals(event.gameId)) {
+			if (enemies[i].gameId == (event.gameId)) {
 				enemies[i].loc = event.loc;
 				enemies[i].alive = true;
 				return;
@@ -585,9 +616,11 @@ module.exports = function AutoHeal(dispatch) {
 			loc: event.loc,
 			w: event.w,
 			alive: true,
-			dist: 99999999,
+			dist: Number(99999999),
 			job: null,
-			name: ""
+			name: "",
+			classBufffed: false,
+			stunImmune: false
 		}
 		enemies.push(tempPushEvent);
 		
@@ -600,7 +633,8 @@ module.exports = function AutoHeal(dispatch) {
     dispatch.hook('S_USER_LOCATION_IN_ACTION', 2, (event) => {
         if (!enabled) return;
         for (let i = 0; i < partyMembers.length; i++) {
-            if (partyMembers[i].gameId.equals(event.gameId)) {
+            //if (partyMembers[i].gameId.equals(event.gameId)) {
+            if (partyMembers[i].gameId == (event.gameId)) {
                 partyMembers[i].loc = event.loc;
                 return;
             }
@@ -608,7 +642,8 @@ module.exports = function AutoHeal(dispatch) {
 		
 		// if enemy, update them
 		for (let i = 0; i < enemies.length; i++) {
-			if (enemies[i].gameId.equals(event.gameId)) {
+			//if (enemies[i].gameId.equals(event.gameId)) {
+			if (enemies[i].gameId == (event.gameId)) {
 				enemies[i].loc = event.loc;
 				enemies[i].w = event.w;
 				enemies[i].alive = true;
@@ -622,9 +657,11 @@ module.exports = function AutoHeal(dispatch) {
 			loc: event.loc,
 			w: event.w,
 			alive: true,
-			dist: 99999999,
+			dist: Number(99999999),
 			job: null,
-			name: ""
+			name: "",
+			classBufffed: false,
+			stunImmune: false
 		}
 		enemies.push(tempPushEvent);
 		
@@ -637,7 +674,8 @@ module.exports = function AutoHeal(dispatch) {
     dispatch.hook('S_INSTANT_DASH', 3, (event) => {
         if (!enabled) return;
         for (let i = 0; i < partyMembers.length; i++) {
-            if (partyMembers[i].gameId.equals(event.gameId)) {
+            //if (partyMembers[i].gameId.equals(event.gameId)) {
+            if (partyMembers[i].gameId == (event.gameId)) {
                 partyMembers[i].loc = event.loc;
                 return;
             }
@@ -645,7 +683,8 @@ module.exports = function AutoHeal(dispatch) {
 		
 		// if enemy, update them
 		for (let i = 0; i < enemies.length; i++) {
-			if (enemies[i].gameId.equals(event.gameId)) {
+			//if (enemies[i].gameId.equals(event.gameId)) {
+			if (enemies[i].gameId == (event.gameId)) {
 				enemies[i].loc = event.loc;
 				enemies[i].w = event.w;
 				enemies[i].alive = true;
@@ -659,9 +698,11 @@ module.exports = function AutoHeal(dispatch) {
 			loc: event.loc,
 			w: event.w,
 			alive: true,
-			dist: 99999999,
+			dist: Number(99999999),
 			job: null,
-			name: ""
+			name: "",
+			classBufffed: false,
+			stunImmune: false
 		}
 		enemies.push(tempPushEvent);
 		
@@ -676,18 +717,18 @@ module.exports = function AutoHeal(dispatch) {
         if (playerId == event.playerId) return;
         for (let i = 0; i < partyMembers.length; i++) {
             if (partyMembers[i].playerId === event.playerId) {
-				let asd = (event.curHp / event.maxHp) * 100;
+				let asd = (Number(event.curHp) / Number(event.maxHp)) * 100;
 				if (asd != null && asd <= 100){
 					partyMembers[i].hpP = asd;
 				} else {
 					//partyMembers[i].hpP = 100;
-					//command.message("S_PARTY_MEMBER_CHANGE_HP, " + partyMembers[i].playerId + " HP = " + asd);
+					//dispatch.command.message("S_PARTY_MEMBER_CHANGE_HP, " + partyMembers[i].playerId + " HP = " + asd);
 				}
                 //partyMembers[i].hpP = (event.curHp / event.maxHp) * 100;
 				/*let tempvar = Number(event.curHp);
 				let tempvarrr = Number(event.maxHp);
                 partyMembers[i].hpP = tempvar * tempvarrr * 100;*/
-				//command.message("player hp = " + partyMembers[i].hpP);
+				//dispatch.command.message("player hp = " + partyMembers[i].hpP);
                 return;
             }
         }
@@ -699,27 +740,28 @@ module.exports = function AutoHeal(dispatch) {
         if (playerId == event.playerId) return;
         for (let i = 0; i < partyMembers.length; i++) {
             if (partyMembers[i].playerId === event.playerId) {
-				let asd = (event.curHp / event.maxHp) * 100;
+				let asd = (Number(event.curHp) / Number(event.maxHp)) * 100;
 				if (asd != null && asd <= 100){
 					partyMembers[i].hpP = asd;
 				} else {
 					//partyMembers[i].hpP = 100;
-					//command.message("S_PARTY_MEMBER_STAT_UPDATE, " + partyMembers[i].playerId + " HP = " + asd);
+					//dispatch.command.message("S_PARTY_MEMBER_STAT_UPDATE, " + partyMembers[i].playerId + " HP = " + asd);
 				}
                 //partyMembers[i].hpP = (event.curHp / event.maxHp) * 100;
 				/*let tempvar = Number(event.curHp);
 				let tempvarrr = Number(event.maxHp);
                 partyMembers[i].hpP = tempvar * tempvarrr * 100;*/
-				//command.message("player hp = " + partyMembers[i].hpP);
+				//dispatch.command.message("player hp = " + partyMembers[i].hpP);
                 return;
             }
         }
     })
-    
+	
     dispatch.hook('S_DEAD_LOCATION', 2, (event) => {
         if (!enabled) return;
         for (let i = 0; i < partyMembers.length; i++) {
-            if (partyMembers[i].gameId.equals(event.gameId)) {
+            //if (partyMembers[i].gameId.equals(event.gameId)) {
+            if (partyMembers[i].gameId == (event.gameId)) {
                 partyMembers[i].loc = event.loc;
                 partyMembers[i].hpP = 0;
                 return;
@@ -728,7 +770,8 @@ module.exports = function AutoHeal(dispatch) {
 		
 		// if enemy, update them
 		for (let i = 0; i < enemies.length; i++) {
-			if (enemies[i].gameId.equals(event.gameId)) {
+			//if (enemies[i].gameId.equals(event.gameId)) {
+			if (enemies[i].gameId == (event.gameId)) {
 				enemies[i].loc = event.loc; // has no w
 				enemies[i].alive = false;
 				return;
@@ -741,9 +784,11 @@ module.exports = function AutoHeal(dispatch) {
 			loc: event.loc,
 			w: null,
 			alive: false,
-			dist: 99999999,
+			dist: Number(99999999),
 			job: null,
-			name: ""
+			name: "",
+			classBufffed: false,
+			stunImmune: false
 		}
 		enemies.push(tempPushEvent);
 		
@@ -752,6 +797,72 @@ module.exports = function AutoHeal(dispatch) {
 		return;
 		
     })
+	
+	
+	
+	
+	dispatch.hook('S_ABNORMALITY_BEGIN', 3, event => {
+        if (event.id == RagnarokId) {
+			if (buffPartyMemberGrow){
+				for (let i = 0; i < partyMembers.length; i++) {
+					//if (partyMembers[i].gameId.equals(event.target)) {
+					if (partyMembers[i].gameId == (event.target)) {
+						applyChange(event.target, GROW_ID);
+					}
+				}
+			}
+			if (buffGrow){
+				for (let i = 0; i < enemies.length; i++) {
+					//if (enemies[i].gameId.equals(event.target)) {
+					if (enemies[i].gameId == (event.target)) {
+						applyChange(event.target, GROW_ID);
+					}
+				}
+			}
+			
+			
+        }
+     })
+
+     dispatch.hook('S_ABNORMALITY_END', 1, event => {
+        if (event.id == RagnarokId) {
+            removeChange(event.target, GROW_ID);
+        }
+     })
+
+    function applyChange (target, id){
+        dispatch.toClient('S_ABNORMALITY_END', 1, {
+                    target: target,
+                    id: id,
+                });	
+        dispatch.toClient('S_ABNORMALITY_BEGIN', 3, {
+                    target: target,
+                    source: target,
+                    id: id,
+                    duration: duration,
+                    unk: 0,
+                    stacks: stack,
+                    unk2: 0,
+                });
+    }
+    
+    function removeChange (target, id){
+        dispatch.toClient('S_ABNORMALITY_BEGIN', 3, {
+                    target: target,
+                    source: target,                      
+                    id: id,                      	  //Sometimes abnormality disappears and needs to be restored before removing.
+                    duration: duration,			  //This makes sure u can restore your appearance and no abnormality icon is left in your buff bar.
+                    unk: 0,
+                    stacks: stack,
+                    unk2: 0,
+                });
+        dispatch.toClient('S_ABNORMALITY_END', 1, {
+                    target: target,
+                    id: id,
+                });	
+	}
+	
+	
     
     dispatch.hook('S_LEAVE_PARTY_MEMBER', 2, (event) => {
         if (!enabled) return;
@@ -792,14 +903,14 @@ module.exports = function AutoHeal(dispatch) {
 		let tempvarrr = Number(event.maxHp);
 		tempvar = tempvar * tempvarrr * 100;
 		*/
-		//command.message("Boss hp = " + tempvar);
+		//dispatch.command.message("Boss hp = " + tempvar);
         let tempPushEvent = {
             id: event.id,
-            x: 99999999,
-            y: 99999999,
-            z: 99999999,
+            x: Number(99999999),
+            y: Number(99999999),
+            z: Number(99999999),
             w: null,
-            hp: Math.round(event.curHp / event.maxHp * 100),
+            hp: (Number(event.curHp) / Number(event.maxHp) * 100),
             //hp: tempvar,
             dist: 100
         }
@@ -807,13 +918,19 @@ module.exports = function AutoHeal(dispatch) {
             bossInfo.push(tempPushEvent);
         } else {
             for (let b = 0; b < bossInfo.length; b++) {
-                if (bossInfo[b].id.equals(event.id)) {
-                    bossInfo[b].hp = Math.round(event.curHp / event.maxHp * 100);
+                //if (bossInfo[b].id.equals(event.id)) {
+                if (bossInfo[b].id == (event.id)) {
+                    bossInfo[b].hp = (Number(event.curHp) / Number(event.maxHp) * 100);
                     //bossInfo[b].hp = tempvar;
                     alreadyHaveBoss = true;
                     if (event.curHp <= 0) {
                         bossInfo = bossInfo.filter(function (p) {
-                            return !p.id.equals(event.id);
+                            //return !p.id.equals(event.id);
+							let tempvari = true;
+							if (p.id == event.id){
+								tempvari = false;
+							}
+                            return tempvari;
                         });
                     }
                     break;
@@ -825,12 +942,13 @@ module.exports = function AutoHeal(dispatch) {
         }
 
     });
-// use 8 once patch 75
-    dispatch.hook('S_ACTION_STAGE', 7, { order: -10 }, (event) => {
+	
+    dispatch.hook('S_ACTION_STAGE', 9, { order: -10 }, (event) => {
 
         if (bossInfo.length > 0) {
 			for (let b = 0; b < bossInfo.length; b++) {
-				if (event.gameId.equals(bossInfo[b].id)) {
+				//if (event.gameId.equals(bossInfo[b].id)) {
+				if (event.gameId == (bossInfo[b].id)) {
 					bossInfo[b].x = event.loc.x;
 					bossInfo[b].y = event.loc.y;
 					bossInfo[b].z = event.loc.z;
@@ -843,7 +961,8 @@ module.exports = function AutoHeal(dispatch) {
 		
 		if (enemies.length <= 0) {
 			for (let b = 0; b < enemies.length; b++) {
-				if (event.gameId.equals(enemies[b].id)) {
+				//if (event.gameId.equals(enemies[b].id)) {
+				if (event.gameId == (enemies[b].id)) {
 					enemies[b].loc = event.loc;
 					enemies[b].w = event.w;
 					break;
@@ -884,9 +1003,9 @@ module.exports = function AutoHeal(dispatch) {
 		
 		//reset = false;
         //message("starting");
-        //command.message("starting");
+        //dispatch.command.message("starting");
         if(config.Skills[job] && config.Skills[job].includes(skill)) { // heal/cleanse?
-			//command.message("Priest or mystic heal");
+			//dispatch.command.message("Priest or mystic heal");
 			if (partyMembers.length == 0) return; // be in a party
             if (skill != 9 && !config.autoHeal) return; // skip heal if disabled
             if (skill == 9 && !config.autoCleanse) return; // skip cleanse if disabled
@@ -936,12 +1055,12 @@ module.exports = function AutoHeal(dispatch) {
                     }, config.autoDpsDelay);
                 }
             }
-			//command.message("reset = " + reset);
+			//dispatch.command.message("reset = " + reset);
 			//message("reset = " + reset);
-			//command.message("Priest or mystic heal completed!");
+			//dispatch.command.message("Priest or mystic heal completed!");
         } else if (job == 7 && (skill == 24 || skill == 28 || skill == 41) && bossInfo != null && bossInfo.length != 0 && config.targetBoss){ // Mystic and Volley of Curses || Sonorous Dreams || Contagion
 			// TODO
-			//command.message("Mystic lockon attacks");
+			//dispatch.command.message("Mystic lockon attacks");
             sortDistBoss();
 			
 			let targetMembers = [];
@@ -976,10 +1095,10 @@ module.exports = function AutoHeal(dispatch) {
                 }
             }
 			
-			//command.message("Mystic lockon Completed");
+			//dispatch.command.message("Mystic lockon Completed");
 			
 		} else if (job == 6 && (skill == 30 || skill == 33 || skill == 35) && bossInfo != null && bossInfo.length != 0 && config.targetBoss){ // Priest and Plague of Exhaustion || Ishara's Lullaby || Energy Stars
-			//command.message("Priest lockon attacks");
+			//dispatch.command.message("Priest lockon attacks");
 			sortDistBoss();
 			
 			let targetMembers = [];
@@ -1013,10 +1132,10 @@ module.exports = function AutoHeal(dispatch) {
                 }
             }
 			
-			//command.message("Priest lockon Completed");
+			//dispatch.command.message("Priest lockon Completed");
 			
 		} else if (((job == 5 && skill == 2) || (job == 4 && (skill == 20 || skill == 22))) && bossInfo != null && bossInfo.length != 0 && config.targetBoss){ // Arrow Volley or Flaming Barrage or Burning Breath
-			//command.message("Sorc or Archer lockon - boss");
+			//dispatch.command.message("Sorc or Archer lockon - boss");
 			//message("Sorc or Archer lockon - boss");
 			sortDistBoss();
 			
@@ -1052,9 +1171,9 @@ module.exports = function AutoHeal(dispatch) {
                 }
             }
 			
-			//command.message("Sorc or Archer lockon Completed");
+			//dispatch.command.message("Sorc or Archer lockon Completed");
 		} else if (((job == 6 && (skill == 30)) || (job == 7 && (skill == 30))) && enemies.length != 0){ // Priest and Plague of Exhaustion OR Mystic and Curse of Exhaustion
-			//command.message("Priest Lockon Enemies - Plague");
+			//dispatch.command.message("Priest Lockon Enemies - Plague");
 			
 			let targetMembers = [];
             let maxTargetCount = 4;
@@ -1075,7 +1194,7 @@ module.exports = function AutoHeal(dispatch) {
 							if (enemies[i].dist <= config.maxDebuffRange) {
 								if (!config.blockList[0].includes(enemies[i].name)){
 									targetMembers.push(enemies[i]);
-									//command.message("Priest Enemy Added - Plague" + (i+1));
+									//dispatch.command.message("Priest Enemy Added - Plague" + (i+1));
 									if (targetMembers.length == maxTargetCount) break;
 								}
 							}
@@ -1116,7 +1235,7 @@ module.exports = function AutoHeal(dispatch) {
 								(config.pvalk ? enemies[i].job == 12 : false)){
 									if (!config.blockList[0].includes(enemies[i].name)){
 										targetMembers.push(enemies[i]);
-										//command.message("Priest Enemy Added - Sleep" + (i+1));
+										//dispatch.command.message("Priest Enemy Added - Sleep" + (i+1));
 										if (targetMembers.length == maxTargetCount) break;
 									}
 								}
@@ -1137,7 +1256,7 @@ module.exports = function AutoHeal(dispatch) {
 							if (enemies[i].dist <= config.maxDebuffRange) {
 								if (!config.blockList[0].includes(enemies[i].name)){
 									targetMembers.push(enemies[i]);
-									//command.message("Priest Enemy Added - Sleep" + (i+1));
+									//dispatch.command.message("Priest Enemy Added - Sleep" + (i+1));
 									if (targetMembers.length == maxTargetCount) break;
 								}
 							}
@@ -1167,7 +1286,7 @@ module.exports = function AutoHeal(dispatch) {
 								(config.pvalk ? enemies[i].job == 12 : false)){
 									if (!config.blockList[0].includes(enemies[i].name)){
 										targetMembers.push(enemies[i]);
-										//command.message("Priest Enemy Added - Sleep" + (i+1));
+										//dispatch.command.message("Priest Enemy Added - Sleep" + (i+1));
 										if (targetMembers.length == maxTargetCount) break;
 									}
 								}
@@ -1186,7 +1305,7 @@ module.exports = function AutoHeal(dispatch) {
 						if (enemies[i].dist <= config.maxDebuffRange) {
 							if (!config.blockList[0].includes(enemies[i].name)){
 								targetMembers.push(enemies[i]);
-								//command.message("Priest Enemy Added - Plague" + (i+1));
+								//dispatch.command.message("Priest Enemy Added - Plague" + (i+1));
 								if (targetMembers.length == maxTargetCount) break;
 							}
 						}
@@ -1207,16 +1326,16 @@ module.exports = function AutoHeal(dispatch) {
                         dispatch.toServer('C_START_SKILL', 7, Object.assign({}, event, {w: playerLocation.w, skill: (event.skill.id + 10)}));
                     }, config.autoDpsDelay);
                 }
-				//command.message("Priest Lockon Completed - Plague");
+				//dispatch.command.message("Priest Lockon Completed - Plague");
             }
-			//command.message("Priest Lockon Enemies Completed - Plague");
+			//dispatch.command.message("Priest Lockon Enemies Completed - Plague");
 			
 		} else if (((job == 6 && skill == 35) || // Priest and Energy Stars
 		(job == 5 && skill == 2) || // Arrow Volley
 		(job == 7 && (skill == 24 || skill == 41)) || // Volley of Curses or Contagion
 		(job == 4 && (skill == 20 || skill == 22))) // Flaming Barrage or Burning Breath
 		&& enemies.length != 0){ 
-			//command.message("Priest Lockon Enemies - eStars");
+			//dispatch.command.message("Priest Lockon Enemies - eStars");
 			
 			let targetMembers = [];
             let maxTargetCount = 1;
@@ -1227,7 +1346,7 @@ module.exports = function AutoHeal(dispatch) {
 			} else if (skill == 2) {
 				maxTargetCount = 5;
 			}
-			//command.message(maxTargetCount);
+			//dispatch.command.message(maxTargetCount);
 			//message(maxTargetCount);
 			for (let i = 0; i < enemies.length; i++) { // calculate distance
 				enemies[i].dist = enemies[i].loc.dist3D(playerLocation.loc) / 25;
@@ -1244,7 +1363,7 @@ module.exports = function AutoHeal(dispatch) {
 							if (((skill == 35) && enemies[i].dist <= config.maxEStarsRange) || ((skill == 2 || skill == 20 || skill == 22) && enemies[i].dist <= config.maxDPSRange) || ((skill == 24 || skill == 41) && enemies[i].dist <= config.maxDebuffRange)) {
 								if (!config.dontDamage[0].includes(enemies[i].name)){
 									targetMembers.push(enemies[i]);
-									//command.message("Priest Enemy Added - eStars" + (i+1));
+									//dispatch.command.message("Priest Enemy Added - eStars" + (i+1));
 									if (targetMembers.length == maxTargetCount) break;
 								}
 							}
@@ -1260,7 +1379,7 @@ module.exports = function AutoHeal(dispatch) {
 						if (((skill == 35) && enemies[i].dist <= config.maxEStarsRange) || ((skill == 2 || skill == 20 || skill == 22) && enemies[i].dist <= config.maxDPSRange) || ((skill == 24 || skill == 41) && enemies[i].dist <= config.maxDebuffRange)) {
 							if (!config.dontDamage[0].includes(enemies[i].name)){
 								targetMembers.push(enemies[i]);
-								//command.message("Priest Enemy Added - eStars" + (i+1));
+								//dispatch.command.message("Priest Enemy Added - eStars" + (i+1));
 								if (targetMembers.length == maxTargetCount) break;
 							}
 						}
@@ -1282,12 +1401,12 @@ module.exports = function AutoHeal(dispatch) {
                     }, config.autoDpsDelay);
                 }
 				
-				//command.message("Priest Lockon Completed - eStars");
+				//dispatch.command.message("Priest Lockon Completed - eStars");
             }
-			//command.message("Priest Lockon Enemies Completed - eStars");
+			//dispatch.command.message("Priest Lockon Enemies Completed - eStars");
 			
 		} else if (((job == 6 && (skill == 33)) || (job == 7 && (skill == 28 || skill == 31)) || (job == 4 && (skill == 25 || skill == 21 || skill == 23))) && enemies.length != 0){ // Priest and Ishara's Lullaby OR Mystic and Sonorous Dreams or Curse of Exhaustion OR Sorc and Time Gyre or Nerve Exhaustion or Mana Volley
-			//command.message("Priest Lockon Enemies - Sleep");
+			//dispatch.command.message("Priest Lockon Enemies - Sleep");
 			
 			let targetMembers = [];
             let maxTargetCount = 1; // eStars
@@ -1313,7 +1432,7 @@ module.exports = function AutoHeal(dispatch) {
 							if (enemies[i].dist <= config.maxDebuffRange) {
 								if (!config.blockList[0].includes(enemies[i].name)){
 									targetMembers.push(enemies[i]);
-									//command.message("Priest Enemy Added - Sleep" + (i+1));
+									//dispatch.command.message("Priest Enemy Added - Sleep" + (i+1));
 									if (targetMembers.length == maxTargetCount) break;
 								}
 							}
@@ -1354,7 +1473,7 @@ module.exports = function AutoHeal(dispatch) {
 								(config.valk ? enemies[i].job == 12 : false)){
 									if (!config.blockList[0].includes(enemies[i].name)){
 										targetMembers.push(enemies[i]);
-										//command.message("Priest Enemy Added - Sleep" + (i+1));
+										//dispatch.command.message("Priest Enemy Added - Sleep" + (i+1));
 										if (targetMembers.length == maxTargetCount) break;
 									}
 								}
@@ -1375,7 +1494,7 @@ module.exports = function AutoHeal(dispatch) {
 							if (enemies[i].dist <= config.maxDebuffRange) {
 								if (!config.blockList[0].includes(enemies[i].name)){
 									targetMembers.push(enemies[i]);
-									//command.message("Priest Enemy Added - Sleep" + (i+1));
+									//dispatch.command.message("Priest Enemy Added - Sleep" + (i+1));
 									if (targetMembers.length == maxTargetCount) break;
 								}
 							}
@@ -1405,7 +1524,7 @@ module.exports = function AutoHeal(dispatch) {
 								(config.valk ? enemies[i].job == 12 : false)){
 									if (!config.blockList[0].includes(enemies[i].name)){
 										targetMembers.push(enemies[i]);
-										//command.message("Priest Enemy Added - Sleep" + (i+1));
+										//dispatch.command.message("Priest Enemy Added - Sleep" + (i+1));
 										if (targetMembers.length == maxTargetCount) break;
 									}
 								}
@@ -1424,7 +1543,7 @@ module.exports = function AutoHeal(dispatch) {
 						if (enemies[i].dist <= config.maxDebuffRange) {
 							if (!config.blockList[0].includes(enemies[i].name)){
 								targetMembers.push(enemies[i]);
-								//command.message("Priest Enemy Added - eStars" + (i+1));
+								//dispatch.command.message("Priest Enemy Added - eStars" + (i+1));
 								if (targetMembers.length == maxTargetCount) break;
 							}
 						}
@@ -1446,15 +1565,15 @@ module.exports = function AutoHeal(dispatch) {
                     }, config.autoDpsDelay);
                 }
 				
-				//command.message("Priest Lockon Completed - Sleep");
+				//dispatch.command.message("Priest Lockon Completed - Sleep");
             }
-			//command.message("Priest Lockon Enemies Completed - Sleep");
+			//dispatch.command.message("Priest Lockon Enemies Completed - Sleep");
 			
 		} else {
-			//command.message(skill);
+			//dispatch.command.message(skill);
 			//message(skill);
-			//command.message("Enemies.length = " + enemies.length);
-			//command.message("bossInfo.length = " + bossInfo.length);
+			//dispatch.command.message("Enemies.length = " + enemies.length);
+			//dispatch.command.message("bossInfo.length = " + bossInfo.length);
         }
 		
     })
@@ -1496,7 +1615,7 @@ module.exports = function AutoHeal(dispatch) {
     
     function sortHp() {
         partyMembers.sort(function (a, b) {
-            return parseFloat(a.hpP) - parseFloat(b.hpP);
+            return Number(a.hpP) - Number(b.hpP);
         });
     }
         
@@ -1507,6 +1626,7 @@ module.exports = function AutoHeal(dispatch) {
             let name = partyMembers[i].name;
             name += ' '.repeat(21-name.length);
             let hp = '\tHP: ' + partyMembers[i].hpP.toFixed(2);
+			//let hp = '\tHP: ' + Number(partyMembers[i].hpP).toFixed(2); // wangu's
             let dist = '\tDist: ' + (partyMembers[i].loc.dist3D(playerLocation.loc) / 25).toFixed(2);
             let vert = '\tVert: ' + (Math.abs(partyMembers[i].loc.z - playerLocation.loc.z) / 25).toFixed(2);
             let online = '\tOnline: ' + partyMembers[i].online;
@@ -1517,19 +1637,19 @@ module.exports = function AutoHeal(dispatch) {
 	
 	function sortDistBoss() {
         bossInfo.sort(function (a, b) {
-            return parseFloat(a.dist) - parseFloat(b.dist);
+            return Number(a.dist) - Number(b.dist);
         });
     }
 	
 	function sortDistEnemies() {
 		enemies.sort(function (a, b) {
-			return parseFloat(a.dist) - parseFloat(b.dist);
+			return Number(a.dist) - Number(b.dist);
 		});
 	}
 	
 	function message(msg, chat = false) {
         if (chat == true) {
-            command.message('(Let Me Target) ' + msg);
+            dispatch.command.message('(Let Me Target) ' + msg);
         } else {
             console.log('(Let Me Target) ' + msg);
         }
