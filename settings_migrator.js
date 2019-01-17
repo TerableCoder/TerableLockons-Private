@@ -1,0 +1,426 @@
+const DefaultSettings = {
+		"Skills": {
+			"6": [
+				19,
+				37
+			],
+			"7": [
+				5,
+				9
+			]
+		},
+		
+		"newSkills":{
+			"4":{
+				"className": "Sorcerer",
+				"20":{
+					"name": "Flaming Barrage",
+					"type": "damage",
+					"targets": [
+						"enemy",
+						"boss",
+						"npc"
+					],
+					"distance": 35,
+					"maxTargetCount": 4,
+					"lockonDelay": 0,
+					"autoCastDelay": 0,
+					"autoCast": true
+				},
+				"22":{
+					"name": "Burning Breath",
+					"type": "damage",
+					"targets": [
+						"enemyDps",
+						"enemy",
+						"boss",
+						"npc"
+					],
+					"distance": 35,
+					"maxTargetCount": 1,
+					"lockonDelay": 0,
+					"autoCastDelay": 0,
+					"autoCast": true
+				},
+				"21":{
+					"name": "Time Gyre",
+					"type": "debuff",
+					"targets": [
+						"enemyHealer",
+						"enemy",
+						"boss",
+						"npc"
+					],
+					"distance": 30,
+					"maxTargetCount": 2,
+					"lockonDelay": 0,
+					"autoCastDelay": 0,
+					"autoCast": true
+				},
+				"23":{
+					"name": "Nerve Exhaustion",
+					"type": "debuff",
+					"targets": [
+						"enemyHealer",
+						"enemy",
+						"boss",
+						"npc"
+					],
+					"distance": 30,
+					"maxTargetCount": 4,
+					"lockonDelay": 0,
+					"autoCastDelay": 0,
+					"autoCast": true
+				},
+				"25":{
+					"name": "Mana Volley",
+					"type": "debuff",
+					"targets": [
+						"enemyHealer",
+						"enemy",
+						"boss",
+						"npc"
+					],
+					"distance": 30,
+					"maxTargetCount": 4,
+					"lockonDelay": 0,
+					"autoCastDelay": 0,
+					"autoCast": true
+				}
+			},
+			
+			"5":{
+				"className": "Archer",
+				"2":{
+					"name": "Arrow Volley",
+					"type": "damage",
+					"targets": [
+						"enemy",
+						"boss",
+						"npc"
+					],
+					"distance": 35,
+					"maxTargetCount": 5,
+					"lockonDelay": 0,
+					"autoCastDelay": 0,
+					"autoCast": true
+				}
+			},
+			
+			"6":{
+				"className": "Priest",
+				"19":{
+					"name": "Focus Heal",
+					"type": "heal",
+					"targets": [
+						"heal"
+					],
+					"distance": 35,
+					"maxTargetCount": 4,
+					"lockonDelay": 0,
+					"autoCastDelay": 0,
+					"autoCast": true
+				},
+				"37":{
+					"name": "Healing Immersion",
+					"type": "heal",
+					"targets": [
+						"heal"
+					],
+					"distance": 33,
+					"maxTargetCount": 1,
+					"lockonDelay": 0,
+					"autoCastDelay": 0,
+					"autoCast": true
+				},
+				"30":{
+					"name": "Plague of Exhaustion",
+					"type": "damage",
+					"targets": [
+						"enemyBuff",
+						"enemyHealer",
+						"enemy",
+						"boss",
+						"npc"
+					],
+					"distance": 30,
+					"maxTargetCount": 4,
+					"lockonDelay": 0,
+					"autoCastDelay": 0,
+					"autoCast": true
+				},
+				"33":{
+					"name": "Ishara's Lullaby",
+					"type": "debuff",
+					"targets": [
+						"enemyHealer",
+						"enemy",
+						"boss",
+						"npc"
+					],
+					"distance": 30,
+					"maxTargetCount": 1,
+					"lockonDelay": 0,
+					"autoCastDelay": 0,
+					"autoCast": true
+				},
+				"35":{
+					"name": "Energy Stars",
+					"type": "damage",
+					"targets": [
+						"enemyBuff",
+						"enemyDps",
+						"enemy",
+						"boss",
+						"npc"
+					],
+					"distance": 30,
+					"maxTargetCount": 1,
+					"lockonDelay": 0,
+					"autoCastDelay": 0,
+					"autoCast": true
+				}
+			},
+			
+			"7":{
+				"className": "Mystic",
+				"5":{
+					"name": "Titanic Favor",
+					"type": "heal",
+					"targets": [
+						"heal"
+					],
+					"distance": 35,
+					"maxTargetCount": 4,
+					"lockonDelay": 0,
+					"autoCastDelay": 0,
+					"autoCast": true
+				},
+				"9":{
+					"name": "Arun's Cleansing",
+					"type": "cleanse",
+					"targets": [
+						"cleanse"
+					],
+					"distance": 35,
+					"maxTargetCount": 5,
+					"lockonDelay": 0,
+					"autoCastDelay": 0,
+					"autoCast": true
+				},
+				"24":{
+					"name": "Volley of Curses",
+					"type": "damage",
+					"targets": [
+						"enemyDps",
+						"enemy",
+						"boss",
+						"npc"
+					],
+					"distance": 30,
+					"maxTargetCount": 4,
+					"lockonDelay": 0,
+					"autoCastDelay": 0,
+					"autoCast": true
+				},
+				"41":{
+					"name": "Contaigon",
+					"type": "damage",
+					"targets": [
+						"enemyBuff",
+						"enemyHealer",
+						"enemy",
+						"boss",
+						"npc"
+					],
+					"distance": 30,
+					"maxTargetCount": 4,
+					"lockonDelay": 0,
+					"autoCastDelay": 0,
+					"autoCast": true
+				},
+				"28":{
+					"name": "Sonorous Dreams",
+					"type": "debuff",
+					"targets": [
+						"enemyHealer",
+						"enemyDps",
+						"enemy",
+						"boss",
+						"npc"
+					],
+					"distance": 30,
+					"maxTargetCount": 2,
+					"lockonDelay": 0,
+					"autoCastDelay": 0,
+					"autoCast": true
+				},
+				"31":{
+					"name": "Curse of Confusion",
+					"type": "debuff",
+					"targets": [
+						"enemyHealer",
+						"enemyDps",
+						"enemy",
+						"boss",
+						"npc"
+					],
+					"distance": 30,
+					"maxTargetCount": 2,
+					"lockonDelay": 0,
+					"autoCastDelay": 0,
+					"autoCast": true
+				},
+				"30":{
+					"name": "Curse of Exhaustion",
+					"type": "debuff",
+					"note": "TODO DOUBLE CHECK EVERYHING ABOUT THIS ONE",
+					"targets": [
+						"enemyBuff",
+						"enemy",
+						"boss",
+						"npc"
+					],
+					"distance": 30,
+					"maxTargetCount": 4,
+					"lockonDelay": 0,
+					"autoCastDelay": 0,
+					"autoCast": true
+				},
+				"32":{
+					"name": "Mire",
+					"targets": [
+						"enemyBuff",
+						"enemy",
+						"boss",
+						"npc"
+					],
+					"distance": 30,
+					"maxTargetCount": 2,
+					"lockonDelay": 0,
+					"autoCastDelay": 0,
+					"autoCast": true
+				}
+			}
+			
+		},
+
+		"enabled": true,
+		"autoCast": true,
+		"autoCleanse": true,
+		"autoDps": true,
+		"autoPvP": true,
+        "autoDpsDelay": 20,
+        "lockonDelay": 5,
+		"autoHeal": true,
+		"targetBoss": true,
+		"targetBossFirst": true,
+		"hpCutoff": 100,
+		"maxDistance": 35,
+		"maxVertical": 35,
+
+		"maxImmersionRange": 33,
+		"maxDebuffRange": 30,
+		"maxDPSRange": 35,
+		"maxEStarsRange": 25,
+
+		"splitSleep": true,
+
+		"healer": true,
+		"archer": false,
+		"zerk": false,
+		"lancer": false,
+		"slayer": false,
+		"sorc": false,
+		"warrior": false,
+		"reaper": false,
+		"gunner": false,
+		"brawler": false,
+		"ninja": false,
+		"valk": false,
+
+		"phealer": true,
+		"parcher": false,
+		"pzerk": false,
+		"plancer": false,
+		"pslayer": false,
+		"psorc": false,
+		"pwarrior": false,
+		"preaper": false,
+		"pgunner": false,
+		"pbrawler": false,
+		"pninja": false,
+		"pvalk": true,
+
+		"disableSleep": false,
+
+		"sleepPrioDpsBeforeHealer": false,
+		"plaguePrioDpsBeforeHealer": false,
+
+		"sleepyPlayers": [
+			"Wrong",
+			"Right"
+		],
+		"freeStars": [
+			"Wrong",
+			"Right"
+		],
+		"plaguePrio": [
+			"Wrong",
+			"Right"
+		],
+
+		"blockList": [
+			"Wrong",
+			"Right"
+		],
+		"dontDamage": [
+			"Wrong",
+			"Right"
+		],
+		"dontHeal": [
+			"Wrong",
+			"Right"
+		],
+
+
+		"whatever": false
+};
+
+module.exports = function MigrateSettings(from_ver, to_ver, settings) {
+    if (from_ver === undefined) {
+        // Migrate legacy config file
+        return Object.assign(Object.assign({}, DefaultSettings), settings);
+    } else if (from_ver === null) {
+        // No config file exists, use default settings
+        return DefaultSettings;
+    } else {
+        // Migrate from older version (using the new system) to latest one
+        if (from_ver + 1 < to_ver) {
+            // Recursively upgrade in one-version steps
+            settings = MigrateSettings(from_ver, from_ver + 1, settings);
+            return MigrateSettings(from_ver + 1, to_ver, settings);
+        }
+        
+        // If we reach this point it's guaranteed that from_ver === to_ver - 1, so we can implement
+        // a switch for each version step that upgrades to the next version. This enables us to
+        // upgrade from any version to the latest version without additional effort!
+        switch(to_ver)
+        {
+            default:
+				let oldsettings = settings
+				
+				settings = Object.assign(DefaultSettings, {});
+				
+				for(let option in oldsettings) {
+					if(settings[option]) {
+						settings[option] = oldsettings[option]
+					}
+				}
+				
+				break;
+        }
+        
+        return settings;
+    }
+}

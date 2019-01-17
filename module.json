@@ -1,0 +1,13 @@
+{
+    "disableAutoUpdate": true,
+    "name": "TerableLockons",
+    "author": "TerableCoder",
+    "description": "Instantly lockon in PvE/P",
+    "version": "3",
+    "options": {
+        "settingsVersion": 3,
+        "settingsFile": "config.json",
+        "settingsMigrator": "settings_migrator.js"
+    },
+    "servers": [""]
+}

@@ -18,7 +18,7 @@ module.exports = {
     autoDpsDelay: 10,     // auto cast Delay
     autoHeal: true,     // enable healing skills
 	targetBoss: true,     // if false, won't target bams (good for CU)
-    hpCutoff: 90,       // (healing only) ignore members that have more HP% than this
+    hpCutoff: 100,       // (healing only) ignore members that have more HP% than this
     maxDistance: 35,    // in-game meters. can work up to 35m
     maxVertical: 35,     // (ignore targets at top of CS ladders, etc). can also be 35m
 	
@@ -53,7 +53,9 @@ module.exports = {
 	pgunner: false,
 	pbrawler: false,
 	pninja: false,
-	pvalk: false,
+	pvalk: true,
+	
+	disableSleep: false,
 	
 	sleepPrioDpsBeforeHealer: false,
 	//eStarsPrioDpsBeforeHealer: false,
