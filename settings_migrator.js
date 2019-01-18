@@ -1,16 +1,5 @@
 const DefaultSettings = {
-		"Skills": {
-			"6": [
-				19,
-				37
-			],
-			"7": [
-				5,
-				9
-			]
-		},
-		
-		"newSkills":{
+		"Skills":{
 			"4":{
 				"className": "Sorcerer",
 				"20":{
@@ -42,8 +31,8 @@ const DefaultSettings = {
 					"autoCastDelay": 0,
 					"autoCast": true
 				},
-				"21":{
-					"name": "Time Gyre",
+				"23":{
+					"name": "Mana Volley",
 					"type": "debuff",
 					"targets": [
 						"enemyHealer",
@@ -52,12 +41,12 @@ const DefaultSettings = {
 						"npc"
 					],
 					"distance": 30,
-					"maxTargetCount": 2,
+					"maxTargetCount": 4,
 					"lockonDelay": 0,
 					"autoCastDelay": 0,
 					"autoCast": true
 				},
-				"23":{
+				"21":{
 					"name": "Nerve Exhaustion",
 					"type": "debuff",
 					"targets": [
@@ -73,7 +62,7 @@ const DefaultSettings = {
 					"autoCast": true
 				},
 				"25":{
-					"name": "Mana Volley",
+					"name": "Time Gyre",
 					"type": "debuff",
 					"targets": [
 						"enemyHealer",
@@ -82,7 +71,7 @@ const DefaultSettings = {
 						"npc"
 					],
 					"distance": 30,
-					"maxTargetCount": 4,
+					"maxTargetCount": 2,
 					"lockonDelay": 0,
 					"autoCastDelay": 0,
 					"autoCast": true
@@ -289,6 +278,7 @@ const DefaultSettings = {
 				},
 				"32":{
 					"name": "Mire",
+					"type": "debuff",
 					"targets": [
 						"enemyBuff",
 						"enemy",
@@ -306,62 +296,21 @@ const DefaultSettings = {
 		},
 
 		"enabled": true,
-		"autoCast": true,
-		"autoCleanse": true,
-		"autoDps": true,
-		"autoPvP": true,
         "autoDpsDelay": 20,
         "lockonDelay": 5,
 		"autoHeal": true,
+		"autoCleanse": true,
+		"autoAttack": true,
+		"autoDebuff": true,
+		"targetParty": true,
 		"targetBoss": true,
-		"targetBossFirst": true,
+		"targetEnemy": true,
 		"hpCutoff": 100,
-		"maxDistance": 35,
-		"maxVertical": 35,
-
-		"maxImmersionRange": 33,
-		"maxDebuffRange": 30,
-		"maxDPSRange": 35,
-		"maxEStarsRange": 25,
 
 		"splitSleep": true,
-
-		"healer": true,
-		"archer": false,
-		"zerk": false,
-		"lancer": false,
-		"slayer": false,
-		"sorc": false,
-		"warrior": false,
-		"reaper": false,
-		"gunner": false,
-		"brawler": false,
-		"ninja": false,
-		"valk": false,
-
-		"phealer": true,
-		"parcher": false,
-		"pzerk": false,
-		"plancer": false,
-		"pslayer": false,
-		"psorc": false,
-		"pwarrior": false,
-		"preaper": false,
-		"pgunner": false,
-		"pbrawler": false,
-		"pninja": false,
-		"pvalk": true,
-
 		"disableSleep": false,
 
-		"sleepPrioDpsBeforeHealer": false,
-		"plaguePrioDpsBeforeHealer": false,
-
 		"sleepyPlayers": [
-			"Wrong",
-			"Right"
-		],
-		"freeStars": [
 			"Wrong",
 			"Right"
 		],
@@ -371,10 +320,6 @@ const DefaultSettings = {
 		],
 
 		"blockList": [
-			"Wrong",
-			"Right"
-		],
-		"dontDamage": [
 			"Wrong",
 			"Right"
 		],

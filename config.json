@@ -18,7 +18,7 @@
                     "autoCast": true
                 },
                 "21": {
-                    "name": "Time Gyre",
+                    "name": "Nerve Exhaustion",
                     "type": "debuff",
                     "targets": [
                         "enemyHealer",
@@ -27,7 +27,7 @@
                         "npc"
                     ],
                     "distance": 30,
-                    "maxTargetCount": 2,
+                    "maxTargetCount": 4,
                     "lockonDelay": 0,
                     "autoCastDelay": 0,
                     "autoCast": true
@@ -48,7 +48,7 @@
                     "autoCast": true
                 },
                 "23": {
-                    "name": "Nerve Exhaustion",
+                    "name": "Mana Volley",
                     "type": "debuff",
                     "targets": [
                         "enemyHealer",
@@ -63,7 +63,7 @@
                     "autoCast": true
                 },
                 "25": {
-                    "name": "Mana Volley",
+                    "name": "Time Gyre",
                     "type": "debuff",
                     "targets": [
                         "enemyHealer",
@@ -72,7 +72,7 @@
                         "npc"
                     ],
                     "distance": 30,
-                    "maxTargetCount": 4,
+                    "maxTargetCount": 2,
                     "lockonDelay": 0,
                     "autoCastDelay": 0,
                     "autoCast": true
@@ -260,6 +260,7 @@
                 },
                 "32": {
                     "name": "Mire",
+                    "type": "debuff",
                     "targets": [
                         "enemyBuff",
                         "enemy",
@@ -292,67 +293,32 @@
             }
         },
         "enabled": true,
-        "autoCast": true,
-        "autoCleanse": true,
-        "autoDps": true,
-        "autoPvP": true,
         "autoDpsDelay": 20,
         "lockonDelay": 5,
         "autoHeal": true,
+        "autoCleanse": true,
+        "autoAttack": true,
+        "autoDebuff": true,
+        "targetParty": true,
         "targetBoss": true,
-        "targetBossFirst": true,
-        "hpCutoff": "100",
-        "maxDistance": 35,
-        "maxVertical": 35,
-        "maxImmersionRange": 33,
-        "maxDebuffRange": 30,
-        "maxDPSRange": 35,
-        "maxEStarsRange": 25,
+        "targetEnemy": true,
+        "hpCutoff": 100,
         "splitSleep": true,
-        "healer": true,
-        "archer": false,
-        "zerk": false,
-        "lancer": false,
-        "slayer": false,
-        "sorc": false,
-        "warrior": false,
-        "reaper": false,
-        "gunner": false,
-        "brawler": false,
-        "ninja": false,
-        "valk": false,
-        "phealer": true,
-        "parcher": false,
-        "pzerk": false,
-        "plancer": false,
-        "pslayer": false,
-        "psorc": false,
-        "pwarrior": false,
-        "preaper": false,
-        "pgunner": false,
-        "pbrawler": false,
-        "pninja": false,
-        "pvalk": true,
         "disableSleep": false,
-        "sleepPrioDpsBeforeHealer": false,
-        "plaguePrioDpsBeforeHealer": false,
         "sleepyPlayers": [
             "Wrong",
-            "Right"
-        ],
-        "freeStars": [
-            "Wrong",
-            "Right"
+            "Right",
+            "Yin",
+            "Hyperbolt"
         ],
         "plaguePrio": [
             "Wrong",
-            "Right"
+            "Right",
+            "add",
+            "Yin",
+            "Hyperbolt"
         ],
         "blockList": [
-            "Wrong",
-            "Right"
-        ],
-        "dontDamage": [
             "Wrong",
             "Right"
         ],
