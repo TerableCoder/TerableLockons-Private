@@ -304,6 +304,7 @@ const DefaultSettings = {
 		"autoDebuff": true,
 		"targetParty": true,
 		"targetBoss": true,
+		"targetNpc": true,
 		"targetEnemy": true,
 		"hpCutoff": 100,
 
@@ -311,21 +312,35 @@ const DefaultSettings = {
 		"disableSleep": false,
 
 		"sleepyPlayers": [
-			"Wrong",
-			"Right"
+			"playerone",
+			"playertwo",
+			"left",
+			"right"
 		],
 		"plaguePrio": [
-			"Wrong",
-			"Right"
+			"playerone",
+			"playertwo",
+			"left",
+			"right"
 		],
 
 		"blockList": [
-			"Wrong",
-			"Right"
+			"playerone",
+			"playertwo",
+			"left",
+			"right"
 		],
 		"dontHeal": [
-			"Wrong",
-			"Right"
+			"playerone",
+			"playertwo",
+			"left",
+			"right"
+		],
+		
+		"findMob": false,
+		"huntingZoneId_templateId": [
+			"13_7004",
+			"13_7003"
 		],
 
 
