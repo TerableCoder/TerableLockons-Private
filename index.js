@@ -44,7 +44,7 @@ module.exports = function TerableLockons(mod){
 	maybe add another thing for GS/Tenacity/Mocking Shout (different color changing debuff for stun, stagger kaias, stagger unbreakable, and both)
     */
     
-    //Class -> Job: warrior = 0, lancer = 1, slayer = 2, berserker = 3, sorcerer = 4, archer = 5,
+    //Class#: warrior = 0, lancer = 1, slayer = 2, berserker = 3, sorcerer = 4, archer = 5,
     //priest = 6, mystic = 7, reaper = 8, gunner = 9, brawler = 10, ninja = 11, valkyrie = 12
     
 	function loopBigIntToString(obj){ // from PacketsLogger
@@ -53,18 +53,17 @@ module.exports = function TerableLockons(mod){
 			else if(typeof obj[key] === "bigint") obj[key] = obj[key].toString();
 		});
 	}
-	function printBigInt(whatList, printInGame){
-		let tempevent = whatList;
-		loopBigIntToString(tempevent);
-		console.log(JSON.stringify(tempevent, null, 4));
-		if(printInGame) command.message(JSON.stringify(tempevent, null, 4));
+	function printBigInt(whatList, printInGame){ // WARNING: DON'T USE THIS FUNCTION BEFORE SENDING A BIGINT TO THE SERVER OR YOU WILL CRASH FROM IT NO LONGER BEING A BIG INT
+		loopBigIntToString(whatList);
+		console.log(JSON.stringify(whatList, null, 4));
+		if(printInGame) command.message(JSON.stringify(whatList, null, 4));
 	}
 	
 	function toggleOnOfSetting(variableToToggle, commandMessage, argument, whatNumber){
 		if(!argument){
 			mod.settings[variableToToggle] = !mod.settings[variableToToggle];
 			mod.saveSettings();
-			console.log(commandMessage + (mod.settings[variableToToggle] ? 'enabled' : 'disabled'));
+			command.message(commandMessage + (mod.settings[variableToToggle] ? 'enabled' : 'disabled'));
 			return;
         }
 		let isNumber = !isNaN(argument);
@@ -82,12 +81,8 @@ module.exports = function TerableLockons(mod){
             return;
         }
 		mod.saveSettings();
-        
-		if(whatNumber){
-			command.message(commandMessage + (mod.settings[variableToToggle] ? 'enabled (' + mod.settings[whatNumber] + '%)' : 'disabled'));
-        } else{
-			command.message(commandMessage + (mod.settings[variableToToggle] ? 'enabled' : 'disabled'));
-		}
+		if(whatNumber) command.message(commandMessage + (mod.settings[variableToToggle] ? 'enabled (' + mod.settings[whatNumber] + '%)' : 'disabled'));
+        else command.message(commandMessage + (mod.settings[variableToToggle] ? 'enabled' : 'disabled'));
 	}
 	
 	command.add(['teral', 'tlockons', 'teralockons', 'terablelockons'], (p1)=> { // allow users to change skill settings from this command
@@ -101,7 +96,7 @@ module.exports = function TerableLockons(mod){
 		toggleOnOfSetting("autoCleanse", 'Cleansing is ', p1, null);
     });
 	command.add('autoattack', (p1)=> {
-		toggleOnOfSetting("autoAttack", 'Attack lockons are ', p1, "hpCutoff");
+		toggleOnOfSetting("autoAttack", 'Attack lockons are ', p1, null);
     });
     command.add('autodebuff', (p1) => {
 		toggleOnOfSetting("autoDebuff", 'Debuff lockons are ', p1, null);
@@ -134,7 +129,7 @@ module.exports = function TerableLockons(mod){
 	
 	command.add('castdelay', (p1)=> {
 		let delay = Number(p1);
-        if(delay.isNaN() || delay < 0){
+        if(isNaN(delay) || delay < 0){
             command.message(p1 +' is an invalid argument');
             return;
         }
@@ -144,7 +139,7 @@ module.exports = function TerableLockons(mod){
     });
 	command.add('lockondelay', (p1)=> {
 		let delay = Number(p1);
-        if(delay.isNaN() || delay < 0){
+        if(isNaN(delay) || delay < 0){
             command.message(p1 +' is an invalid argument');
             return;
         }
@@ -160,7 +155,7 @@ module.exports = function TerableLockons(mod){
 		if(add && argumentIndex == -1) mod.settings[whatList].push(argument); // if not in list, add to list
 		else if(!add && argumentIndex > -1) mod.settings[whatList].splice(argumentIndex, 1); // if in list, remove from list
 		mod.saveSettings();
-		printBigInt(mod.settings[whatList], false);
+		printBigInt(mod.settings[whatList], true);
 	}
 	
     command.add('sleepy', (p1) => {
@@ -190,7 +185,7 @@ module.exports = function TerableLockons(mod){
     });
 	
 	
-    command.add('tp', () => {
+    command.add('tparty', () => {
         sortHp();
 		printBigInt(partyMembers, true);
     });
@@ -206,7 +201,7 @@ module.exports = function TerableLockons(mod){
 		sortDistEnemies();
 		printBigInt(enemies, true);
     });
-	command.add('cp', () => {
+	command.add('cparty', () => {
         partyMembers = [];
 		printBigInt(partyMembers, true);
     });
@@ -644,8 +639,10 @@ module.exports = function TerableLockons(mod){
 			// TODO: Check if enemy.guild = myguild, then skip them
 			// add targets
 			for (let k = 0; k < mod.settings.Skills[job][skill].targets.length; k++){ // go through all target arrays // TODO ADD NPC
-				if(targetMembers.length == maxTargetCount) break; // TODO add check to see if the target is already targeted before adding them 
-				if(mod.settings.Skills[job][skill].targets[k] == "boss" && mod.settings.targetBoss){ // boss, target boss
+				if(targetMembers.length == maxTargetCount) break; // TODO add check to see if the target is already targeted before adding them
+				
+				if(mod.settings.Skills[job][skill].targets[k] == "boss"){ // boss, target boss
+					if(healing || !mod.settings.targetBoss) continue;
 					for (let j = 0; j < bossInfo.length; j++){ // queue bams to lock on to
 						if(bossInfo[j].dist <= mod.settings.Skills[job][skill].distance){ // in range
 							targetMembers.push(bossInfo[j]);
@@ -654,7 +651,8 @@ module.exports = function TerableLockons(mod){
 					}
 					continue;
 				}
-				if(mod.settings.Skills[job][skill].targets[k] == "npc" && mod.settings.targetNpc){ // npc, target npc
+				if(mod.settings.Skills[job][skill].targets[k] == "npc"){ // npc, target npc
+					if(healing || !mod.settings.targetNpc) continue;
                     for (let j = 0; j < npcInfo.length; j++){ // queue bams to lock on to
                         if(npcInfo[j].dist <= mod.settings.Skills[job][skill].distance){ // in range
 							if(mod.settings.huntingZoneId_templateId.indexOf(npcInfo[j].huntingZoneId + "_" + npcInfo[j].templateId) > -1) targetMembers.push(npcInfo[j]); // in config
@@ -666,9 +664,10 @@ module.exports = function TerableLockons(mod){
 				for (let i = 0; i < targetArrayLength; i++){ // go through current array
 					if(targetMembers.length == maxTargetCount) break;
 					
-					if(healing && partyMembers[i].online &&  // heal/cleanse online 
-					partyMembers[i].hpP && ((skill == 9) ? true : partyMembers[i].hpP <= mod.settings.hpCutoff) && // check (hp < hpCutoff) if not cleanse
-					partyMembers[i].loc && (partyMembers[i].loc.dist3D(playerLocation.loc) / 25) <= mod.settings.Skills[job][skill].distance){ // in range
+					if(healing && mod.settings.targetParty && partyMembers[i].online &&  // heal/cleanse online 
+					partyMembers[i].hpP && partyMembers[i].hpP != undefined && partyMembers[i].hpP != 0 &&
+					((skill == 9) ? true : partyMembers[i].hpP <= mod.settings.hpCutoff) && // check (hp < hpCutoff) if not cleanse
+					partyMembers[i].loc && partyMembers[i].loc != undefined && (partyMembers[i].loc.dist3D(playerLocation.loc) / 25) <= mod.settings.Skills[job][skill].distance){ // in range
 						let dontHealThem = false;
 						let partyMemberName = partyMembers[i].name.toLowerCase();
 						for (let j = 0; j < mod.settings.dontHeal.length; j++){
@@ -708,25 +707,20 @@ module.exports = function TerableLockons(mod){
 					}
 				}
 			}
-			lockonAndComplete(event, targetMembers, mod.settings.Skills[job][skill].autoCast);
+			for (let y = 0; y < targetMembers.length; y++){ // lockon to targets
+				setTimeout(() => {
+					if(targetMembers[y].gameId) mod.toServer('C_CAN_LOCKON_TARGET', 3, {target: targetMembers[y].gameId, skill: event.skill.id}); // player/npc
+					else mod.toServer('C_CAN_LOCKON_TARGET', 3, {target: targetMembers[y].id, skill: event.skill.id}); // bam
+				}, mod.settings.lockonDelay);
+			}
+			if(mod.settings.Skills[job][skill].autoCast){ // cast skill
+				setTimeout(() => {
+					mod.toServer('C_START_SKILL', 7, Object.assign({}, event, {w: playerLocation.w, skill: (event.skill.id + 10)}));
+				}, mod.settings.autoDpsDelay);
+			}
 		}
 	});
 	
-	function lockonAndComplete(event, targetMembers, autoComplete){
-		//printBigInt(targetMembers, true); // debug
-		if(targetMembers.length < 1) return;
-		for (let target of targetMembers){ // lockon to targets
-			setTimeout(() => {
-				if(!target.id) mod.toServer('C_CAN_LOCKON_TARGET', 3, {target: Number(target.gameId), skill: event.skill.id}); // player/npc
-				else mod.toServer('C_CAN_LOCKON_TARGET', 3, {target: Number(target.id), skill: event.skill.id}); // bam
-			}, mod.settings.lockonDelay);
-		}
-		if(autoComplete){ // cast skill
-			setTimeout(() => {
-				mod.toServer('C_START_SKILL', 7, Object.assign({}, event, {w: playerLocation.w, skill: (event.skill.id + 10)}));
-			}, mod.settings.autoDpsDelay);
-		}
-	}
 	
 	function sortHp(){
         partyMembers.sort(function (a, b){
@@ -736,7 +730,6 @@ module.exports = function TerableLockons(mod){
 	function sortDistBoss(){
 		for (let i = 0; i < bossInfo.length; i++){ // calculate distance
 			bossInfo[i].dist = (Math.sqrt(Math.pow(bossInfo[i].x - playerLocation.loc.x, 2) + Math.pow(bossInfo[i].y - playerLocation.loc.y, 2) + Math.pow(bossInfo[i].z - playerLocation.loc.z, 2))) / 25;
-            //bossInfo[i].dist = bossInfo[i].loc.dist3D(playerLocation.loc) / 25;
 		}
         bossInfo.sort(function (a, b){
             return Number(a.dist) - Number(b.dist);
@@ -744,7 +737,6 @@ module.exports = function TerableLockons(mod){
     }
     function sortDistNpc(){
         for (let i = 0; i < npcInfo.length; i++){ // calculate distance
-            //bossInfo[i].dist = (Math.sqrt(Math.pow(bossInfo[i].x - playerLocation.loc.x, 2) + Math.pow(bossInfo[i].y - playerLocation.loc.y, 2) + Math.pow(bossInfo[i].z - playerLocation.loc.z, 2))) / 25;
             npcInfo[i].dist = npcInfo[i].loc.dist3D(playerLocation.loc) / 25;
         }
         npcInfo.sort(function (a, b){
