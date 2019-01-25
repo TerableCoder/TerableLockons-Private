@@ -7,9 +7,9 @@
                     "name": "Flaming Barrage",
                     "type": "damage",
                     "targets": [
-                        "enemy",
                         "boss",
-                        "npc"
+                        "npc",
+                        "enemy"
                     ],
                     "distance": 35,
                     "maxTargetCount": 4,
@@ -84,9 +84,9 @@
                     "name": "Arrow Volley",
                     "type": "damage",
                     "targets": [
-                        "enemy",
                         "boss",
-                        "npc"
+                        "npc",
+                        "enemy"
                     ],
                     "distance": 35,
                     "maxTargetCount": 5,
@@ -114,7 +114,6 @@
                     "type": "damage",
                     "targets": [
                         "enemyBuff",
-                        "enemyHealer",
                         "enemy",
                         "boss",
                         "npc"
@@ -131,8 +130,8 @@
                     "targets": [
                         "enemyHealer",
                         "enemy",
-                        "boss",
-                        "npc"
+                        "npc",
+                        "boss"
                     ],
                     "distance": 30,
                     "maxTargetCount": 1,
@@ -145,12 +144,12 @@
                     "type": "damage",
                     "targets": [
                         "enemyBuff",
-                        "enemyDps",
-                        "enemy",
                         "boss",
-                        "npc"
+                        "npc",
+                        "enemyDps",
+                        "enemy"
                     ],
-                    "distance": 30,
+                    "distance": 23,
                     "maxTargetCount": 1,
                     "lockonDelay": 0,
                     "autoCastDelay": 0,
@@ -162,7 +161,7 @@
                     "targets": [
                         "heal"
                     ],
-                    "distance": 33,
+                    "distance": 32,
                     "maxTargetCount": 1,
                     "lockonDelay": 0,
                     "autoCastDelay": 0,
@@ -199,10 +198,10 @@
                     "name": "Volley of Curses",
                     "type": "damage",
                     "targets": [
-                        "enemyDps",
-                        "enemy",
                         "boss",
-                        "npc"
+                        "npc",
+                        "enemyDps",
+                        "enemy"
                     ],
                     "distance": 30,
                     "maxTargetCount": 4,
@@ -217,8 +216,8 @@
                         "enemyHealer",
                         "enemyDps",
                         "enemy",
-                        "boss",
-                        "npc"
+                        "npc",
+                        "boss"
                     ],
                     "distance": 30,
                     "maxTargetCount": 2,
@@ -229,12 +228,10 @@
                 "30": {
                     "name": "Curse of Exhaustion",
                     "type": "debuff",
-                    "note": "TODO DOUBLE CHECK EVERYHING ABOUT THIS ONE",
+                    "comment": "TODO DOUBLE CHECK EVERYHING ABOUT THIS ONE",
                     "targets": [
                         "enemyBuff",
-                        "enemy",
-                        "boss",
-                        "npc"
+                        "enemy"
                     ],
                     "distance": 30,
                     "maxTargetCount": 4,
@@ -264,7 +261,6 @@
                     "targets": [
                         "enemyBuff",
                         "enemy",
-                        "boss",
                         "npc"
                     ],
                     "distance": 30,
@@ -277,11 +273,11 @@
                     "name": "Contaigon",
                     "type": "damage",
                     "targets": [
+                        "boss",
+                        "npc",
                         "enemyBuff",
                         "enemyHealer",
-                        "enemy",
-                        "boss",
-                        "npc"
+                        "enemy"
                     ],
                     "distance": 30,
                     "maxTargetCount": 4,
@@ -293,7 +289,7 @@
             }
         },
         "enabled": true,
-        "autoDpsDelay": 20,
+        "autoDpsDelay": 100,
         "lockonDelay": 5,
         "autoHeal": true,
         "autoCleanse": true,
@@ -303,9 +299,18 @@
         "targetBoss": true,
         "targetNpc": true,
         "targetEnemy": true,
+        "prioByClass": true,
         "hpCutoff": 100,
+        "maxVertical": 15,
+        "healCast": true,
+        "cleanseCast": true,
+        "attackCast": true,
+        "debuffCast": true,
         "splitSleep": true,
         "disableSleep": false,
+        "prioClass": [
+            3
+        ],
         "sleepyPlayers": [
             "playerone",
             "playertwo",
@@ -333,8 +338,21 @@
         ],
         "findMob": false,
         "huntingZoneId_templateId": [
+            "1200_6021",
+            "1200_6011",
+            "1200_6001",
+            "116_3001",
+            "116_3000",
+            "116_2000",
+            "13_7009",
+            "13_7008",
+            "13_7007",
+            "13_7006",
+            "13_7005",
             "13_7004",
-            "13_7003"
+            "13_7003",
+            "13_7002",
+            "13_7001"
         ],
         "whatever": false
     }

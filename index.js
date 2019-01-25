@@ -18,6 +18,7 @@ module.exports = function TerableLockons(mod){
         playerLocation = {},
         partyMembers = [],
         job = -1,
+        glyphs = null,
 		bossInfo = [],
 		npcInfo = [],
 		enemies = [];
@@ -89,17 +90,30 @@ module.exports = function TerableLockons(mod){
 		toggleOnOfSetting("enabled", 'TerableLockons is ', p1, null);
 	});
 	
-    command.add('autoheal', (p1)=> {
+    command.add('heal', (p1)=> {
 		toggleOnOfSetting("autoHeal", 'Healing is ', p1, "hpCutoff");
     });
-    command.add('autocleanse', (p1) => {
+    command.add('cleanse', (p1) => {
 		toggleOnOfSetting("autoCleanse", 'Cleansing is ', p1, null);
     });
-	command.add('autoattack', (p1)=> {
+	command.add('attack', (p1)=> {
 		toggleOnOfSetting("autoAttack", 'Attack lockons are ', p1, null);
     });
-    command.add('autodebuff', (p1) => {
+    command.add('debuff', (p1) => {
 		toggleOnOfSetting("autoDebuff", 'Debuff lockons are ', p1, null);
+    });
+	
+	command.add('healcast', (p1)=> {
+		toggleOnOfSetting("healCast", 'Healing completion is ', p1, "hpCutoff");
+    });
+    command.add('cleansecast', (p1) => {
+		toggleOnOfSetting("cleanseCast", 'Cleansing completion is ', p1, null);
+    });
+	command.add('attackcast', (p1)=> {
+		toggleOnOfSetting("attackCast", 'Attack lockons completion is ', p1, null);
+    });
+    command.add('debuffcast', (p1) => {
+		toggleOnOfSetting("debuffCast", 'Debuff lockons completion is ', p1, null);
     });
 	
 	command.add('targetparty', (p1)=> {
@@ -201,7 +215,7 @@ module.exports = function TerableLockons(mod){
 		sortDistEnemies();
 		printBigInt(enemies, true);
     });
-	command.add('cparty', () => {
+	command.add('cparty', () => { // no cp here!
         partyMembers = [];
 		printBigInt(partyMembers, true);
     });
@@ -220,7 +234,7 @@ module.exports = function TerableLockons(mod){
 	
 	command.add('ml', () => {
 		console.log("My Location");
-		printBigInt(playerLocation, true);
+		printBigInt(playerLocation.loc, true);
     });
 	
 	
@@ -275,7 +289,7 @@ module.exports = function TerableLockons(mod){
     
     mod.hook('S_LEAVE_PARTY', 1, (event) => {
         partyMembers = [];
-		//enemies = []; // TODO add party members to enemies, also add ppl to enemies if they drop
+		// TODO add party members to enemies, also add ppl to enemies if they drop
     });
     
     mod.hook('C_PLAYER_LOCATION', 5, (event) => {
@@ -414,7 +428,10 @@ module.exports = function TerableLockons(mod){
     mod.hook('S_DEAD_LOCATION', 2, (event) => {
         for (let i = 0; i < partyMembers.length; i++){
             if(partyMembers[i].gameId == (event.gameId)){
-                partyMembers[i].loc = event.loc;
+                partyMembers[i].loc.x = 0; // don't target the dead...
+                partyMembers[i].loc.y = 0;
+                partyMembers[i].loc.z = 0;
+                //partyMembers[i].loc = event.loc;
                 partyMembers[i].hpP = 0;
                 return;
             }
@@ -422,7 +439,10 @@ module.exports = function TerableLockons(mod){
 		// if enemy, update them
 		for (let i = 0; i < enemies.length; i++){
 			if(enemies[i].gameId == (event.gameId)){
-				enemies[i].loc = event.loc;
+				enemies[i].loc.x = 0; // don't target the dead...
+                enemies[i].loc.y = 0;
+                enemies[i].loc.z = 0;
+				//enemies[i].loc = event.loc;
 				enemies[i].alive = false;
 				return;
 			}
@@ -433,30 +453,22 @@ module.exports = function TerableLockons(mod){
 	
 	
 	// from https://github.com/teralove/make-valk-rag-obvious
-	mod.hook('S_ABNORMALITY_BEGIN', 3, event => { // ADD TOGGLE FOR THIS
-        if(event.id == RagnarokId){
-			if(buffPartyMemberGrow){
-				for (let i = 0; i < partyMembers.length; i++){
-					if(partyMembers[i].gameId == (event.target)){
-						applyChange(event.target, GROW_ID);
-					}
-				}
-			}
-			if(buffGrow){
-				for (let i = 0; i < enemies.length; i++){
-					if(enemies[i].gameId == (event.target)){
-						applyChange(event.target, GROW_ID);
-					}
-				}
-			}
+    mod.hook('S_ABNORMALITY_BEGIN', 3, event => { // ADD COMMAND TO TOGGLE THIS
+        if(event.id != RagnarokId) return;
+        if(buffPartyMemberGrow){
+            for (let i = 0; i < partyMembers.length; i++){
+                if(partyMembers[i].gameId == event.target) applyChange(event.target, GROW_ID);
+            }
+        } else if(buffGrow){
+            for (let i = 0; i < enemies.length; i++){
+                if(enemies[i].gameId == event.target) applyChange(event.target, GROW_ID);
+            }
         }
+    });
+    mod.hook('S_ABNORMALITY_END', 1, event => {
+        if(event.id == RagnarokId) removeChange(event.target, GROW_ID);
     });
 
-    mod.hook('S_ABNORMALITY_END', 1, event => {
-        if(event.id == RagnarokId){
-            removeChange(event.target, GROW_ID);
-        }
-    });
 
     function applyChange(target, id){
         mod.toClient('S_ABNORMALITY_END', 1, {
@@ -473,7 +485,6 @@ module.exports = function TerableLockons(mod){
 			unk2: 0,
 		});
     }
-    
     function removeChange (target, id){
         mod.toClient('S_ABNORMALITY_BEGIN', 3, {
 			target: target,
@@ -494,7 +505,8 @@ module.exports = function TerableLockons(mod){
     mod.hook('S_LEAVE_PARTY_MEMBER', 2, (event) => {
         for (let i = 0; i < partyMembers.length; i++){
             if(partyMembers[i].playerId === event.playerId){
-                partyMembers.splice(i, 1);
+				addEnemy(event.gameId, partyMembers[i].loc, 0, false, Number(99999999), null, "", false, false); // add to enemies
+                partyMembers.splice(i, 1); // remove from party
                 return;
             }
         }
@@ -579,7 +591,6 @@ module.exports = function TerableLockons(mod){
             if(alreadyHaveBoss == false) bossInfo.push(tempPushEvent);
         }
     });
-	
     mod.hook('S_ACTION_STAGE', 9, { order: -10 }, (event) => {
 		for (let b = 0; b < bossInfo.length; b++){
 			if(event.gameId == (bossInfo[b].id)){
@@ -600,12 +611,39 @@ module.exports = function TerableLockons(mod){
     });
 	
 	
+	mod.hook('S_CREST_INFO', 2, (event) => {
+        if (!enabled) return;
+        glyphs = event.crests;
+    });
+    mod.hook('S_CREST_APPLY', 2, (event) => {
+        if (!enabled) return;
+        for (let i = 0; i < glyphs.length; i++) {
+            if (glyphs[i].id == event.id) {
+                glyphs[i].enable = event.enable;
+                return;
+            }
+        }
+    });
+    function getMaxTargets(skill){
+        switch(skill){
+            case 19: return isGlyphEnabled(28003) ? 4 : 2; // priest heal
+            case 5: return isGlyphEnabled(27000) ? 4 : 2; // mystic heal
+            case 9: return (isGlyphEnabled(27063) || isGlyphEnabled(27003)) ? 5 : 3; // cleanse
+        }
+        return 100; // return a big number
+    }
+    function isGlyphEnabled(glyphId){ // add arrow volley and flaming barrage glyphs maybe LOL?
+        for (let i = 0; i < glyphs.length; i++){
+            if(glyphs[i].id == glyphId && glyphs[i].enable)  return true;
+        }
+        return false;
+    }
+	
 	function getNumTargets(job, skill){ // update this, change based upon "splitsleep" 
 		let numTargets = mod.settings.Skills[job][skill].maxTargetCount;
 		if(!mod.settings.splitSleep && (skill == 25 || skill == 28 || skill == 31)) return 1; // Time Gyre, Mystic Sleep, Mystic Fear
 		return numTargets;
     }
-	
 	mod.hook('C_START_SKILL', 7, (event) => {
         if(!enabled || !mod.settings.enabled) return;
         if(event.skill.id / 10 & 1 != 0){ // is casting (opposed to locking on)
@@ -623,6 +661,8 @@ module.exports = function TerableLockons(mod){
 			
 			sortAllTargets(); // partyMembers + bossInfo + enemies
             let maxTargetCount = getNumTargets(job, skill);
+            let maxTargets = getMaxTargets(skill);
+			maxTargetCount = maxTargetCount < maxTargets ? maxTargetCount : maxTargets; // whichever is smaller
             let targetMembers = []; // who we lockon to 
 			let targetArrayLength = 0; // partyMembers or enemies
 			let healing = false;
@@ -638,8 +678,8 @@ module.exports = function TerableLockons(mod){
 			// TODO: Deal with people who teleport out still getting targeted
 			// TODO: Check if enemy.guild = myguild, then skip them
 			// add targets
-			for (let k = 0; k < mod.settings.Skills[job][skill].targets.length; k++){ // go through all target arrays // TODO ADD NPC
-				if(targetMembers.length == maxTargetCount) break; // TODO add check to see if the target is already targeted before adding them
+			for (let k = 0; k < mod.settings.Skills[job][skill].targets.length; k++){ // go through all target arrays
+				if(targetMembers.length == maxTargetCount) break;
 				
 				if(mod.settings.Skills[job][skill].targets[k] == "boss"){ // boss, target boss
 					if(healing || !mod.settings.targetBoss) continue;
@@ -667,7 +707,8 @@ module.exports = function TerableLockons(mod){
 					if(healing && mod.settings.targetParty && partyMembers[i].online &&  // heal/cleanse online 
 					partyMembers[i].hpP && partyMembers[i].hpP != undefined && partyMembers[i].hpP != 0 &&
 					((skill == 9) ? true : partyMembers[i].hpP <= mod.settings.hpCutoff) && // check (hp < hpCutoff) if not cleanse
-					partyMembers[i].loc && partyMembers[i].loc != undefined && (partyMembers[i].loc.dist3D(playerLocation.loc) / 25) <= mod.settings.Skills[job][skill].distance){ // in range
+					partyMembers[i].loc && partyMembers[i].loc != undefined && (Math.abs(partyMembers[i].loc.z - playerLocation.loc.z) / 25) <= mod.settings.maxVertical &&
+					(partyMembers[i].loc.dist3D(playerLocation.loc) / 25) <= mod.settings.Skills[job][skill].distance){ // in range
 						let dontHealThem = false;
 						let partyMemberName = partyMembers[i].name.toLowerCase();
 						for (let j = 0; j < mod.settings.dontHeal.length; j++){
@@ -682,32 +723,52 @@ module.exports = function TerableLockons(mod){
 						if((mod.settings.Skills[job][skill].targets[k] == "enemyBuff" || mod.settings.Skills[job][skill].targets[k] == "enemyHealer" || // enemy
 						mod.settings.Skills[job][skill].targets[k] == "enemyDps" || mod.settings.Skills[job][skill].targets[k] == "enemy") &&
 						enemies[i].alive && !mod.settings.blockList[enemies[i].name] &&  // alive, not blocked
+						enemies[i].loc && enemies[i].loc != undefined &&(Math.abs(enemies[i].loc.z - playerLocation.loc.z) / 25) <= mod.settings.maxVertical &&
 						enemies[i].dist <= mod.settings.Skills[job][skill].distance){ // in range
 							if(prioArrayToCheck.length != 0 && !checkedPriorityTargets){
 								checkedPriorityTargets = true;
-								for (let j = 0; j < prioArrayToCheck.length; j++){ // search priority list
+								for (let j = 0; j < prioArrayToCheck.length; j++){ // search name priority list
+									if(targetMembers.length == maxTargetCount) break;
 									for (let u = 0; u < targetArrayLength; u++){ // search enemies
-										if(enemies[u].name == prioArrayToCheck[j].toLowerCase()){ // enemy name is priority
+										if(enemies[u].name == prioArrayToCheck[j].toLowerCase() && // enemy name is priority
+										enemies[i].alive && !mod.settings.blockList[enemies[i].name] &&  // alive, not blocked
+										enemies[i].dist <= mod.settings.Skills[job][skill].distance){ // in range
 											targetMembers.push(enemies[u]); // add
 											break;
 										}
 									}
-									if(targetMembers.length == maxTargetCount) break;
 								}
-								if(targetMembers.length == maxTargetCount) break;
 							}
+							if(targetMembers.length == maxTargetCount) break;
+							
+							if(mod.settings.prioByClass && (skill != 31 && skill != 28 && skill != 33 && skill != 35)){ // not sleep/fear/estars(fails too often [idk why])
+								for (let j = 0; j < mod.settings.prioClass.length; j++){ // search class priority list
+									if(targetMembers.length == maxTargetCount) break;
+									for (let u = 0; u < targetArrayLength; u++){ // search enemies
+										if(targetMembers.length == maxTargetCount) break;
+										if(enemies[u].job == mod.settings.prioClass[j] && // enemy class is priority
+										enemies[i].alive && !mod.settings.blockList[enemies[i].name] &&  // alive, not blocked
+										(Math.abs(enemies[i].loc.z - playerLocation.loc.z) / 25) <= mod.settings.maxVertical &&
+										enemies[i].dist <= mod.settings.Skills[job][skill].distance){ // in range
+											if(targetMembers.indexOf(enemies[u]) == -1) targetMembers.push(enemies[u]); // add if not already in list
+										}
+									}
+								}
+							}
+							if(targetMembers.length == maxTargetCount) break;
+							
 							if(mod.settings.Skills[job][skill].targets[k] == "enemyHealer" && (enemies[i].job == 6 || enemies[i].job == 7)){ // targeting healer
-								targetMembers.push(enemies[i]);
+								if(targetMembers.indexOf(enemies[i]) == -1) targetMembers.push(enemies[i]);
 							} else if(mod.settings.Skills[job][skill].targets[k] == "enemyDps" && (enemies[i].job != 6 && enemies[i].job != 7)){ // targeting dps
-								targetMembers.push(enemies[i]);
+								if(targetMembers.indexOf(enemies[i]) == -1) targetMembers.push(enemies[i]);
 							} else if(mod.settings.Skills[job][skill].targets[k] == "enemy"){ // no priority target found, look for anyone
-								targetMembers.push(enemies[i]);
+								if(targetMembers.indexOf(enemies[i]) == -1) targetMembers.push(enemies[i]);
 							}
 						}
 					}
 				}
 			}
-			for (let y = 0; y < targetMembers.length; y++){ // lockon to targets
+			/*for (let y = 0; y < targetMembers.length; y++){ // lockon to targets
 				setTimeout(() => {
 					if(targetMembers[y].gameId) mod.toServer('C_CAN_LOCKON_TARGET', 3, {target: targetMembers[y].gameId, skill: event.skill.id}); // player/npc
 					else mod.toServer('C_CAN_LOCKON_TARGET', 3, {target: targetMembers[y].id, skill: event.skill.id}); // bam
@@ -717,7 +778,28 @@ module.exports = function TerableLockons(mod){
 				setTimeout(() => {
 					mod.toServer('C_START_SKILL', 7, Object.assign({}, event, {w: playerLocation.w, skill: (event.skill.id + 10)}));
 				}, mod.settings.autoDpsDelay);
-			}
+			}*/
+			
+			// if no delay, use global default delay
+            let lockondelay = mod.settings.Skills[job][skill].lockonDelay ? mod.settings.Skills[job][skill].lockonDelay : mod.settings.lockonDelay;
+            let castdelay = mod.settings.Skills[job][skill].autoCastDelay ? mod.settings.Skills[job][skill].autoCastDelay : mod.settings.autoDpsDelay;
+            let autoCast = false;
+            if(mod.settings.Skills[job][skill].type == "heal" && mod.settings.healCast) autoCast = true;
+            else if(mod.settings.Skills[job][skill].type == "cleanse" && mod.settings.cleanseCast) autoCast = true; 
+            else if(mod.settings.Skills[job][skill].type == "damage" && mod.settings.attackCast) autoCast = true;
+            else if(mod.settings.Skills[job][skill].type == "debuff" && mod.settings.debuffCast) autoCast = true;
+            
+            for (let y = 0; y < targetMembers.length; y++){ // lockon to targets
+                setTimeout(() => {
+                    if(targetMembers[y].gameId) mod.toServer('C_CAN_LOCKON_TARGET', 3, {target: targetMembers[y].gameId, skill: event.skill.id}); // player/npc
+                    else mod.toServer('C_CAN_LOCKON_TARGET', 3, {target: targetMembers[y].id, skill: event.skill.id}); // bam
+                }, lockondelay);
+            }
+            if(autoCast && mod.settings.Skills[job][skill].autoCast){ // cast skill
+                setTimeout(() => {
+                    mod.toServer('C_START_SKILL', 7, Object.assign({}, event, {w: playerLocation.w, skill: (event.skill.id + 10)}));
+                }, castdelay);
+            }
 		}
 	});
 	

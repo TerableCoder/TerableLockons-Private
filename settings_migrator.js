@@ -6,9 +6,9 @@ const DefaultSettings = {
 					"name": "Flaming Barrage",
 					"type": "damage",
 					"targets": [
-						"enemy",
 						"boss",
-						"npc"
+						"npc",
+						"enemy"
 					],
 					"distance": 35,
 					"maxTargetCount": 4,
@@ -84,9 +84,9 @@ const DefaultSettings = {
 					"name": "Arrow Volley",
 					"type": "damage",
 					"targets": [
-						"enemy",
 						"boss",
-						"npc"
+						"npc",
+						"enemy"
 					],
 					"distance": 35,
 					"maxTargetCount": 5,
@@ -116,7 +116,7 @@ const DefaultSettings = {
 					"targets": [
 						"heal"
 					],
-					"distance": 33,
+					"distance": 32,
 					"maxTargetCount": 1,
 					"lockonDelay": 0,
 					"autoCastDelay": 0,
@@ -127,7 +127,6 @@ const DefaultSettings = {
 					"type": "damage",
 					"targets": [
 						"enemyBuff",
-						"enemyHealer",
 						"enemy",
 						"boss",
 						"npc"
@@ -144,8 +143,8 @@ const DefaultSettings = {
 					"targets": [
 						"enemyHealer",
 						"enemy",
-						"boss",
-						"npc"
+						"npc",
+						"boss"
 					],
 					"distance": 30,
 					"maxTargetCount": 1,
@@ -158,12 +157,12 @@ const DefaultSettings = {
 					"type": "damage",
 					"targets": [
 						"enemyBuff",
-						"enemyDps",
-						"enemy",
 						"boss",
-						"npc"
+						"npc",
+						"enemyDps",
+						"enemy"
 					],
-					"distance": 30,
+					"distance": 23,
 					"maxTargetCount": 1,
 					"lockonDelay": 0,
 					"autoCastDelay": 0,
@@ -201,10 +200,10 @@ const DefaultSettings = {
 					"name": "Volley of Curses",
 					"type": "damage",
 					"targets": [
-						"enemyDps",
-						"enemy",
 						"boss",
-						"npc"
+						"npc",
+						"enemyDps",
+						"enemy"
 					],
 					"distance": 30,
 					"maxTargetCount": 4,
@@ -216,11 +215,11 @@ const DefaultSettings = {
 					"name": "Contaigon",
 					"type": "damage",
 					"targets": [
+						"boss",
+						"npc",
 						"enemyBuff",
 						"enemyHealer",
-						"enemy",
-						"boss",
-						"npc"
+						"enemy"
 					],
 					"distance": 30,
 					"maxTargetCount": 4,
@@ -235,8 +234,8 @@ const DefaultSettings = {
 						"enemyHealer",
 						"enemyDps",
 						"enemy",
-						"boss",
-						"npc"
+						"npc",
+						"boss"
 					],
 					"distance": 30,
 					"maxTargetCount": 2,
@@ -263,12 +262,10 @@ const DefaultSettings = {
 				"30":{
 					"name": "Curse of Exhaustion",
 					"type": "debuff",
-					"note": "TODO DOUBLE CHECK EVERYHING ABOUT THIS ONE",
+					"comment": "TODO DOUBLE CHECK EVERYHING ABOUT THIS ONE",
 					"targets": [
 						"enemyBuff",
-						"enemy",
-						"boss",
-						"npc"
+						"enemy"
 					],
 					"distance": 30,
 					"maxTargetCount": 4,
@@ -282,7 +279,6 @@ const DefaultSettings = {
 					"targets": [
 						"enemyBuff",
 						"enemy",
-						"boss",
 						"npc"
 					],
 					"distance": 30,
@@ -306,10 +302,20 @@ const DefaultSettings = {
 		"targetBoss": true,
 		"targetNpc": true,
 		"targetEnemy": true,
+		"prioByClass": true,
 		"hpCutoff": 100,
+		"maxVertical": 15,
+		"healCast": true,
+        "cleanseCast": true,
+        "attackCast": true,
+        "debuffCast": true,
 
 		"splitSleep": true,
 		"disableSleep": false,
+		
+		"prioClass": [
+			3
+		],
 
 		"sleepyPlayers": [
 			"playerone",
@@ -339,8 +345,21 @@ const DefaultSettings = {
 		
 		"findMob": false,
 		"huntingZoneId_templateId": [
+			"1200_6021",
+			"1200_6011",
+			"1200_6001",
+			"116_3001",
+			"116_3000",
+			"116_2000",
+			"13_7009",
+			"13_7008",
+			"13_7007",
+			"13_7006",
+			"13_7005",
 			"13_7004",
-			"13_7003"
+			"13_7003",
+			"13_7002",
+			"13_7001"
 		],
 
 
