@@ -158,9 +158,10 @@ Skill target priority can be configured per skill in the 'config.json' file.
 <details>
 	
 	- TODO: Edit skill config by command
+	- TODO: Reload config by command
 	- TODO: Don't try to lockon to non-partied(enemy) guild members
-	- TODO: Make increase max target number glyphs actually work for archer/sorc, probably never
-	- TODO: Make there be a timeout so that if an enemy hasn't been seen in a long time we reset their location, maybe?
+	- TODO: Make increase max target number glyphs work for archer/sorc, probably never...
+	- TODO: Make there be a timeout so that if an enemy hasn't been updated in a long time we reset their location, maybe?
 	- TODO: Make boss list never bug, aka boss resets
 	- TODO: Add buffed target prioritization
 	- TODO: Fix printing BigInts and then locking on causing the game to crash

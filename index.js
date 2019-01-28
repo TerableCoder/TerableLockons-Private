@@ -612,17 +612,11 @@ module.exports = function TerableLockons(mod){
 	
 	
 	mod.hook('S_CREST_INFO', 2, (event) => {
-        if (!enabled) return;
         glyphs = event.crests;
     });
     mod.hook('S_CREST_APPLY', 2, (event) => {
-        if (!enabled) return;
-        for (let i = 0; i < glyphs.length; i++) {
-            if (glyphs[i].id == event.id) {
-                glyphs[i].enable = event.enable;
-                return;
-            }
-        }
+		let glyph = glyphs.find(g => g.id == event.id);
+        if(glyph) glyph.enable = event.enable;  
     });
     function getMaxTargets(skill){
         switch(skill){
