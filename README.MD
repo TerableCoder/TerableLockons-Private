@@ -89,7 +89,8 @@ Skill target priority can be configured per skill in the 'config.json' file.
 - Toggle or set Priest and Mystic Sleep to enabled/disabled (useful for Bahaar)
 ### `splitsleep [on/off]`
 - Toggle or set Time Gyre, Mystic Sleep, Mystic Fear, Mire # of targets from default to 1, enabled/disabled
-
+### `eth [on/off]`
+- Toggle or set max range = 20 to enabled/disabled
 ### `findmob [on/off]`
 - Toggle or set the printing of NPC IDs upon despawn to enabled/disabled
 
