@@ -86,8 +86,181 @@ module.exports = function TerableLockons(mod){
         else command.message(commandMessage + (mod.settings[variableToToggle] ? 'enabled' : 'disabled'));
 	}
 	
-	command.add(['teral', 'tlockons', 'teralockons', 'terablelockons'], (p1)=> { // allow users to change skill settings from this command
-		toggleOnOfSetting("enabled", 'TerableLockons is ', p1, null);
+	command.add(['cs', 'changeskill'], (p1, p2, p3, p4) => {
+    	if(typeof p1 === 'string' || p1 instanceof String){
+			p1 = p1.replace("_", " "); // replace _ with space
+			p1.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();}); // capitalize first letter of each word
+			//var splitStr = p1.toLowerCase().split(' '); // capitalize first letter of each word
+			//for (var i = 0; i < splitStr.length; i++) {
+			//   splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1);     
+			//}
+			//p1 = splitStr.join(' '); 
+			let foundSkill = mod.settings.Skills[job].find(p => p.name == p1);
+			//mod.settings.Skills[job][skill].type 
+			console.log(`p1 = ${p1}, p2 = ${p2}, p3 = ${p3}, p4 = ${p4}`);
+			console.log(foundSkill);
+            if(foundSkill){
+				if(p2){
+					p2.toLowerCase();
+				} else {
+					command.message("Missing 2nd argument");
+					changeSkillHelp();
+					return;
+				}
+				switch(p2){
+					case "targets":
+						let add = false;
+						let remove = false;
+						if(p3 == "add"){
+							add = true;
+						} else if(p3 == "remove"){
+							remove = true;
+						} else{
+							command.message("Missing 3rd argument");
+							changeSkillHelp();
+							return;
+						}
+						let argIndex;
+						switch(p4){
+							case "enemyBuff":
+							case "enemyHealer":
+							case "enemyDps":
+							case "enemy":
+							case "boss":
+							case "npc":
+								if(foundSkill.type == "heal" || foundSkill.type == "cleanse"){
+									command.message("You can only target heal with heals, and cleanse with cleanse");
+									return;
+								}
+								argIndex = foundSkill.targets.indexOf(p4);
+								if(add && argIndex == -1) foundSkill.targets.push(p4);
+								else if(remove && argIndex > -1) foundSkill.targets.splice(argIndex, 1);
+								break;
+							case "heal":
+							case "cleanse":
+								if(foundSkill.type != p4){
+									command.message("You can only target heal with heals, and cleanse with cleanse");
+									return;
+								}
+								argIndex = foundSkill.targets.indexOf(p4);
+								if(add && argIndex == -1) foundSkill.targets.push(p4);
+								else if(remove && argIndex > -1) foundSkill.targets.splice(argIndex, 1);
+								break;
+							default:
+								command.message("Missing 4th argument");
+								changeSkillHelp();
+								return;
+						}
+						break;
+					case "distance":
+						if(isNaN(p3)) command.message("Distance must be a number");
+						else foundSkill.distance = p3.toString();
+						break;
+					case "maxtargetcount":
+						if(isNaN(p3)) command.message("maxTargetCount must be a number");
+						else if(p3 > -1) foundSkill.maxTargetCount = p3.toString();
+						break;
+					case "lockondelay":
+						if(isNaN(p3)) command.message("lockonDelay must be a number");
+						else if(p3 > -1) foundSkill.lockonDelay = p3.toString();
+						break;
+					case "autocastdelay":
+						if(isNaN(p3)) command.message("autoCastDelay must be a number");
+						else if(p3 > -1) foundSkill.autoCastDelay = p3.toString();
+						break;
+					case "autocast":
+						switch(p4){
+							case "on":
+							case "true":
+								foundSkill.autoCast = true;
+								break;
+							case "off":
+							case "false":
+								foundSkill.autoCast = false;
+								break;
+							default:
+								foundSkill.autoCast = !foundSkill.autoCast;
+								break;
+						}
+					default:
+						command.message("2nd argument is invalid");
+						changeSkillHelp();
+						return;
+				}
+				mod.saveSettings();
+			} else{
+				command.message("Couldn't find skill named " + p1);
+				changeSkillHelp();
+			}				
+		}
+    });
+	
+	function changeSkillHelp(){
+		command.message("The command changeskill format is:");
+		command.message("changeskill skill_name targets add/remove atarget");
+		command.message("changeskill skill_name distance thedistance");
+		command.message("changeskill skill_name maxtargetcount numtargets");
+		command.message("changeskill skill_name lockondelay delay");
+		command.message("changeskill skill_name autocastdelay delay");
+		command.message("changeskill skill_name autocast [on/off/true/false]");
+	}
+	
+	
+	command.add(['teral', 'tlockons', 'teralockons', 'terablelockons'], (p1, p2)=> {
+		if(p1 == "reload"){
+			/*if(mod.proxyAuthor !== 'caali'){
+				const options = require('./module').options
+				if(options){
+					const settingsVersion = options.settingsVersion
+					if(settingsVersion){
+						mod.settings = require('./' + (options.settingsMigrator || 'module_settings_migrator.js'))(mod.settings._version, settingsVersion, mod.settings)
+						mod.settings._version = settingsVersion
+					}
+				}
+			} else{*/
+				console.log("~~~Before~~~");
+				console.log(mod.settings);
+				mod.settings = require('./config.json'); // idk if this works
+				console.log("~~~Midway~~~");
+				console.log(mod.settings);
+				mod.settings = mod.settings.data;
+				console.log("~~~After~~~");
+				console.log(mod.settings);
+			//}
+		} else if(p1 == "help"){
+			if(p2){
+				switch(p2){
+					case "heal":
+						command.message("heal, cleanse, healcast, cleansecast, targetparty, dh (name), dhr (name)");
+						return;
+					case "attack":
+						command.message("attack, attackcast, targetboss, targetnpc, targetenemy, pp(name), ppr (name), bl (name), blr (name)");
+						return;
+					case "debuff":
+						command.message("debuff, debuffcast, targetboss, targetnpc, targetenemy, sleepy (name), sleepyr (name), bl (name), blr (name)");
+						return;
+					case "other":
+						command.message("teral, teral reload, disablesleep, splitcc, findmob, castdelay (delay), lockondelay (delay)");
+						command.message("cs skill_name targets add/remove thetarget, cs skill_name variable value");
+						command.message("ml, tparty, cparty, tnpc, cnpc, tb, cb, te, ce");
+						return;
+					case "all":
+						command.message("heal, cleanse, healcast, cleansecast, targetparty, dh (name), dhr (name)");
+						command.message("attack, attackcast, targetboss, targetnpc, targetenemy, pp(name), ppr (name), bl (name), blr (name)");
+						command.message("debuff, debuffcast, targetboss, targetnpc, targetenemy, sleepy (name), sleepyr (name), bl (name), blr (name)");
+						command.message("teral, teral reload, disablesleep, splitcc, findmob, castdelay (delay), lockondelay (delay)");
+						command.message("cs skill_name targets add/remove thetarget, cs skill_name variable value");
+						command.message("ml, tparty, cparty, tnpc, cnpc, tb, cb, te, ce");
+						return;
+					default: // VVV print out help directory VVV
+				}
+			}
+			command.message("teral help heal");
+			command.message("teral help attack");
+			command.message("teral help debuff");
+			command.message("teral help other");
+			command.message("teral help all");
+		} else toggleOnOfSetting("enabled", 'TerableLockons is ', p1, null);
 	});
 	
     command.add('heal', (p1)=> {
@@ -135,6 +308,9 @@ module.exports = function TerableLockons(mod){
 	command.add('splitcc', (p1)=> {
 		toggleOnOfSetting("splitSleep", 'Split Sleep/Fear/Gyre is ', p1, null);
     });
+	command.add('eth', (p1)=> {
+		toggleOnOfSetting("ethics", 'Ethics is ', p1, null);
+    });
 	
 	command.add('findmob', (p1)=> {
 		toggleOnOfSetting("findMob", 'Find Mob is ', p1, null);
@@ -164,11 +340,13 @@ module.exports = function TerableLockons(mod){
 	
 	
 	function priorityNameList(whatList, argument, add){
-		if(argument) argument = argument.toLowerCase();
-		let argumentIndex = mod.settings[whatList].indexOf(argument);
-		if(add && argumentIndex == -1) mod.settings[whatList].push(argument); // if not in list, add to list
-		else if(!add && argumentIndex > -1) mod.settings[whatList].splice(argumentIndex, 1); // if in list, remove from list
-		mod.saveSettings();
+		if(argument){ 
+			argument = argument.toLowerCase();
+			let argumentIndex = mod.settings[whatList].indexOf(argument);
+			if(add && argumentIndex == -1) mod.settings[whatList].push(argument); // if not in list, add to list
+			else if(!add && argumentIndex > -1) mod.settings[whatList].splice(argumentIndex, 1); // if in list, remove from list
+			mod.saveSettings();
+		}
 		printBigInt(mod.settings[whatList], true);
 	}
 	
@@ -199,21 +377,25 @@ module.exports = function TerableLockons(mod){
     });
 	
 	
-    command.add('tparty', () => {
+	 command.add('tparty', () => {
         sortHp();
 		printBigInt(partyMembers, true);
-    });
-	command.add('tnpc', () => {
-        sortDistNpc();
-		printBigInt(npcInfo, true);
+		partyMembers = [];
     });
 	command.add('tb', () => {
         sortDistBoss();
 		printBigInt(bossInfo, true);
+		bossInfo = [];
+    });
+	command.add('tnpc', () => {
+        sortDistNpc();
+		printBigInt(npcInfo, true);
+		npcInfo = [];
     });
 	command.add('te', () => {
 		sortDistEnemies();
 		printBigInt(enemies, true);
+		enemies = [];
     });
 	command.add('cparty', () => { // no cp here!
         partyMembers = [];
@@ -661,6 +843,7 @@ module.exports = function TerableLockons(mod){
 			let targetArrayLength = 0; // partyMembers or enemies
 			let healing = false;
 			let checkedPriorityTargets = false;
+			let checkedClassTargets = false;
 			let prioArrayToCheck = (mod.settings.Skills[job][skill].type == "damage") ? mod.settings.plaguePrio : (mod.settings.Skills[job][skill].type == "debuff") ? mod.settings.sleepyPlayers : []; // get priority target list
 			
 			if(mod.settings.Skills[job][skill].type == "heal" || mod.settings.Skills[job][skill].type == "cleanse"){
@@ -678,77 +861,85 @@ module.exports = function TerableLockons(mod){
 				if(mod.settings.Skills[job][skill].targets[k] == "boss"){ // boss, target boss
 					if(healing || !mod.settings.targetBoss) continue;
 					for (let j = 0; j < bossInfo.length; j++){ // queue bams to lock on to
-						if(bossInfo[j].dist <= mod.settings.Skills[job][skill].distance){ // in range
-							targetMembers.push(bossInfo[j]);
-							if(targetMembers.length == maxTargetCount) break;
-						}
+						if(!(mod.settings.ethics && bossInfo[j].dist <= 20) && !(!mod.settings.ethics && bossInfo[j].dist <= mod.settings.Skills[job][skill].distance)) break;
+						targetMembers.push(bossInfo[j]); // push if in range
+						if(targetMembers.length == maxTargetCount) break;
 					}
 					continue;
 				}
 				if(mod.settings.Skills[job][skill].targets[k] == "npc"){ // npc, target npc
 					if(healing || !mod.settings.targetNpc) continue;
                     for (let j = 0; j < npcInfo.length; j++){ // queue bams to lock on to
-                        if(npcInfo[j].dist <= mod.settings.Skills[job][skill].distance){ // in range
-							if(mod.settings.huntingZoneId_templateId.indexOf(npcInfo[j].huntingZoneId + "_" + npcInfo[j].templateId) > -1) targetMembers.push(npcInfo[j]); // in config
-                            if(targetMembers.length == maxTargetCount) break;
-                        }
+						if(!(mod.settings.ethics && npcInfo[j].dist <= 20) && !(!mod.settings.ethics && npcInfo[j].dist <= mod.settings.Skills[job][skill].distance)) break;
+						if(mod.settings.huntingZoneId_templateId.indexOf(npcInfo[j].huntingZoneId + "_" + npcInfo[j].templateId) > -1) targetMembers.push(npcInfo[j]); // in config
+						if(targetMembers.length == maxTargetCount) break;
                     }
                     continue;
                 }
 				for (let i = 0; i < targetArrayLength; i++){ // go through current array
 					if(targetMembers.length == maxTargetCount) break;
 					
-					if(healing && mod.settings.targetParty && partyMembers[i].online &&  // heal/cleanse online 
-					partyMembers[i].hpP && partyMembers[i].hpP != undefined && partyMembers[i].hpP != 0 &&
-					((skill == 9) ? true : partyMembers[i].hpP <= mod.settings.hpCutoff) && // check (hp < hpCutoff) if not cleanse
-					partyMembers[i].loc && partyMembers[i].loc != undefined && (Math.abs(partyMembers[i].loc.z - playerLocation.loc.z) / 25) <= mod.settings.maxVertical &&
-					(partyMembers[i].loc.dist3D(playerLocation.loc) / 25) <= mod.settings.Skills[job][skill].distance){ // in range
-						let dontHealThem = false;
-						let partyMemberName = partyMembers[i].name.toLowerCase();
-						for (let j = 0; j < mod.settings.dontHeal.length; j++){
-							if(mod.settings.dontHeal[j] == partyMemberName){ // on the don't heal list
-								dontHealThem = true;
-								break;
+					if(healing && mod.settings.targetParty){
+						if(partyMembers[i].online &&  // heal/cleanse online 
+						partyMembers[i].hpP && partyMembers[i].hpP != undefined && partyMembers[i].hpP != 0 &&
+						((skill == 9) ? true : partyMembers[i].hpP <= mod.settings.hpCutoff) && // check (hp < hpCutoff) if not cleanse
+						partyMembers[i].loc && partyMembers[i].loc != undefined && (Math.abs(partyMembers[i].loc.z - playerLocation.loc.z) / 25) <= mod.settings.maxVertical){
+							if(!(mod.settings.ethics && (partyMembers[i].loc.dist3D(playerLocation.loc) / 25) <= 20) && !(!mod.settings.ethics && (partyMembers[i].loc.dist3D(playerLocation.loc) / 25) <= mod.settings.Skills[job][skill].distance)) break;
+							let dontHealThem = false;
+							let partyMemberName = partyMembers[i].name.toLowerCase();
+							for (let j = 0; j < mod.settings.dontHeal.length; j++){
+								if(mod.settings.dontHeal[j] == partyMemberName){ // on the don't heal list
+									dontHealThem = true;
+									break;
+								}
 							}
+							if(!dontHealThem) targetMembers.push(partyMembers[i]); // add
 						}
-						if(!dontHealThem) targetMembers.push(partyMembers[i]); // add
-						
 					} else if(!healing && mod.settings.targetEnemy){ // attack and enabled
 						if((mod.settings.Skills[job][skill].targets[k] == "enemyBuff" || mod.settings.Skills[job][skill].targets[k] == "enemyHealer" || // enemy
 						mod.settings.Skills[job][skill].targets[k] == "enemyDps" || mod.settings.Skills[job][skill].targets[k] == "enemy") &&
 						enemies[i].alive && !mod.settings.blockList[enemies[i].name] &&  // alive, not blocked
-						enemies[i].loc && enemies[i].loc != undefined &&(Math.abs(enemies[i].loc.z - playerLocation.loc.z) / 25) <= mod.settings.maxVertical &&
-						enemies[i].dist <= mod.settings.Skills[job][skill].distance){ // in range
+						enemies[i].loc && enemies[i].loc != undefined && (Math.abs(enemies[i].loc.z - playerLocation.loc.z) / 25) <= mod.settings.maxVertical){
+							if(!(mod.settings.ethics && enemies[i].dist <= 20) && !(!mod.settings.ethics && enemies[i].dist <= mod.settings.Skills[job][skill].distance)) break;
 							if(prioArrayToCheck.length != 0 && !checkedPriorityTargets){
 								checkedPriorityTargets = true;
 								for (let j = 0; j < prioArrayToCheck.length; j++){ // search name priority list
 									if(targetMembers.length == maxTargetCount) break;
 									for (let u = 0; u < targetArrayLength; u++){ // search enemies
 										if(enemies[u].name == prioArrayToCheck[j].toLowerCase() && // enemy name is priority
-										enemies[i].alive && !mod.settings.blockList[enemies[i].name] &&  // alive, not blocked
-										enemies[i].dist <= mod.settings.Skills[job][skill].distance){ // in range
+										enemies[i].alive && !mod.settings.blockList[enemies[i].name]){ // alive, not blocked
+											if(!(mod.settings.ethics && enemies[u].dist <= 20) && !(!mod.settings.ethics && enemies[u].dist <= mod.settings.Skills[job][skill].distance)) break;
 											targetMembers.push(enemies[u]); // add
+											//console.log(enemies[u].name);
+											//console.log(enemies[u].dist);
+											//console.log("^^ PRIO NAME ^^");
 											break;
 										}
 									}
 								}
 							}
+							//console.log("targetMembers.length = " + targetMembers.length + " at i = " + i + " after prioname");
 							if(targetMembers.length == maxTargetCount) break;
 							
-							if(mod.settings.prioByClass && (skill != 31 && skill != 28 && skill != 33 && skill != 35)){ // not sleep/fear/estars(fails too often [idk why])
+							if(mod.settings.prioByClass && (skill != 31 && skill != 28 && skill != 33 && skill != 35) && !checkedClassTargets){ // not sleep/fear/estars(buff doesn't apply to me too often)
+								checkedClassTargets = true;
 								for (let j = 0; j < mod.settings.prioClass.length; j++){ // search class priority list
 									if(targetMembers.length == maxTargetCount) break;
 									for (let u = 0; u < targetArrayLength; u++){ // search enemies
 										if(targetMembers.length == maxTargetCount) break;
 										if(enemies[u].job == mod.settings.prioClass[j] && // enemy class is priority
 										enemies[i].alive && !mod.settings.blockList[enemies[i].name] &&  // alive, not blocked
-										(Math.abs(enemies[i].loc.z - playerLocation.loc.z) / 25) <= mod.settings.maxVertical &&
-										enemies[i].dist <= mod.settings.Skills[job][skill].distance){ // in range
+										(Math.abs(enemies[i].loc.z - playerLocation.loc.z) / 25) <= mod.settings.maxVertical){
+											if(!(mod.settings.ethics && enemies[u].dist <= 20) && !(!mod.settings.ethics && enemies[u].dist <= mod.settings.Skills[job][skill].distance)) break;
 											if(targetMembers.indexOf(enemies[u]) == -1) targetMembers.push(enemies[u]); // add if not already in list
+											//console.log(enemies[u].name);
+											//console.log(enemies[u].dist);
+											//console.log("^^ PRIO CLASS ^^");
 										}
 									}
 								}
 							}
+							//console.log("targetMembers.length = " + targetMembers.length + " at i = " + i + " after prioclass");
 							if(targetMembers.length == maxTargetCount) break;
 							
 							if(mod.settings.Skills[job][skill].targets[k] == "enemyHealer" && (enemies[i].job == 6 || enemies[i].job == 7)){ // targeting healer
@@ -758,21 +949,14 @@ module.exports = function TerableLockons(mod){
 							} else if(mod.settings.Skills[job][skill].targets[k] == "enemy"){ // no priority target found, look for anyone
 								if(targetMembers.indexOf(enemies[i]) == -1) targetMembers.push(enemies[i]);
 							}
+							//console.log(enemies[i].name);
+							//console.log(enemies[i].dist);
+							//console.log("^^ regular ^^");
+							//console.log("targetMembers.length = " + targetMembers.length + " at i = " + i + " after " + mod.settings.Skills[job][skill].targets[k]);
 						}
 					}
 				}
 			}
-			/*for (let y = 0; y < targetMembers.length; y++){ // lockon to targets
-				setTimeout(() => {
-					if(targetMembers[y].gameId) mod.toServer('C_CAN_LOCKON_TARGET', 3, {target: targetMembers[y].gameId, skill: event.skill.id}); // player/npc
-					else mod.toServer('C_CAN_LOCKON_TARGET', 3, {target: targetMembers[y].id, skill: event.skill.id}); // bam
-				}, mod.settings.lockonDelay);
-			}
-			if(mod.settings.Skills[job][skill].autoCast){ // cast skill
-				setTimeout(() => {
-					mod.toServer('C_START_SKILL', 7, Object.assign({}, event, {w: playerLocation.w, skill: (event.skill.id + 10)}));
-				}, mod.settings.autoDpsDelay);
-			}*/
 			
 			// if no delay, use global default delay
             let lockondelay = mod.settings.Skills[job][skill].lockonDelay ? mod.settings.Skills[job][skill].lockonDelay : mod.settings.lockonDelay;
@@ -782,12 +966,15 @@ module.exports = function TerableLockons(mod){
             else if(mod.settings.Skills[job][skill].type == "cleanse" && mod.settings.cleanseCast) autoCast = true; 
             else if(mod.settings.Skills[job][skill].type == "damage" && mod.settings.attackCast) autoCast = true;
             else if(mod.settings.Skills[job][skill].type == "debuff" && mod.settings.debuffCast) autoCast = true;
-            
+			//console.log("maxTargetCount = " + maxTargetCount);
+            //console.log("targetMembers.length = " + targetMembers.length);
             for (let y = 0; y < targetMembers.length; y++){ // lockon to targets
                 setTimeout(() => {
                     if(targetMembers[y].gameId) mod.toServer('C_CAN_LOCKON_TARGET', 3, {target: targetMembers[y].gameId, skill: event.skill.id}); // player/npc
                     else mod.toServer('C_CAN_LOCKON_TARGET', 3, {target: targetMembers[y].id, skill: event.skill.id}); // bam
                 }, lockondelay);
+				//console.log(targetMembers[y].name);
+				//if(targetMembers[y].dist) console.log(targetMembers[y].dist);
             }
             if(autoCast && mod.settings.Skills[job][skill].autoCast){ // cast skill
                 setTimeout(() => {

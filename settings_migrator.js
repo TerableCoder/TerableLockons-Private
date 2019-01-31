@@ -312,6 +312,7 @@ const DefaultSettings = {
 
 		"splitSleep": true,
 		"disableSleep": false,
+		"ethics": true,
 		
 		"prioClass": [
 			3

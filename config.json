@@ -289,7 +289,7 @@
             }
         },
         "enabled": true,
-        "autoDpsDelay": 40,
+        "autoDpsDelay": 300,
         "lockonDelay": 5,
         "autoHeal": true,
         "autoCleanse": true,
@@ -307,6 +307,7 @@
         "attackCast": true,
         "debuffCast": true,
         "splitSleep": true,
+        "ethics": true,
         "disableSleep": false,
         "prioClass": [
             3
@@ -322,7 +323,6 @@
             "playertwo",
             "left",
             "right",
-            "reagen",
             "numbnips",
             "fiery"
         ],
