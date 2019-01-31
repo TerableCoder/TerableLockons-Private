@@ -158,6 +158,7 @@ Skill target priority can be configured per skill in the 'config.json' file.
 <details>
 	
 	- TODO: Edit skill config by command
+	- TODO: Add lockons-light (test if I can lockon during their I-frames)
 	- TODO: Reload config by command
 	- TODO: Don't try to lockon to non-partied(enemy) guild members
 	- TODO: Make increase max target number glyphs work for archer/sorc, probably never...
