@@ -377,7 +377,7 @@ module.exports = function TerableLockons(mod){
     });
 	
 	
-	 command.add('tparty', () => {
+	command.add('tparty', () => {
         sortHp();
 		printBigInt(partyMembers, true);
 		partyMembers = [];
@@ -503,9 +503,11 @@ module.exports = function TerableLockons(mod){
 		enemies.push(tempPushEvent);
 	}
 	
-    mod.hook('S_SPAWN_USER', 13, (event) => {
+    mod.hook('S_SPAWN_USER', 14, (event) => {
 		for (let i = 0; i < partyMembers.length; i++){
 			if(partyMembers[i].gameId == event.gameId){
+				partyMembers[i].serverId = event.serverId;
+				partyMembers[i].playerId = event.playerId;
 				partyMembers[i].loc = event.loc;
 				partyMembers[i].hpP = (event.alive ? 100 : 0);
 				return;
@@ -515,6 +517,8 @@ module.exports = function TerableLockons(mod){
 		let theirClass = (event.templateId - 10101) % 100;
 		for (let i = 0; i < enemies.length; i++){
 			if(enemies[i].gameId == event.gameId){ // if enemy, update them
+				enemies[i].serverId = event.serverId;
+				enemies[i].playerId = event.playerId;
 				enemies[i].loc = event.loc;
 				enemies[i].alive = event.alive;
 				enemies[i].job = theirClass;
@@ -973,7 +977,7 @@ module.exports = function TerableLockons(mod){
                     if(targetMembers[y].gameId) mod.toServer('C_CAN_LOCKON_TARGET', 3, {target: targetMembers[y].gameId, skill: event.skill.id}); // player/npc
                     else mod.toServer('C_CAN_LOCKON_TARGET', 3, {target: targetMembers[y].id, skill: event.skill.id}); // bam
                 }, lockondelay);
-				//console.log(targetMembers[y].name);
+				//if(targetMembers[y].name) console.log(targetMembers[y].name);
 				//if(targetMembers[y].dist) console.log(targetMembers[y].dist);
             }
             if(autoCast && mod.settings.Skills[job][skill].autoCast){ // cast skill
