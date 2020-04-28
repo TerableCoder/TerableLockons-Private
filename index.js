@@ -477,10 +477,10 @@ module.exports = function TerableLockons(mod){
 		priorityNameList("huntingZoneId_templateId", p1, false);
     });
 	
-    mod.hook('S_LOGIN', 13, (event) => {
-        playerId = event.playerId;
-        gameId = event.gameId;
-        job = (event.templateId - 10101) % 100;
+    mod.game.on('enter_game', () => { 
+        playerId = mod.game.me.playerId;
+        gameId = mod.game.me.gameId;
+        job = (mod.game.me.templateId - 10101) % 100;
         enabled = (mod.settings.Skills[job]) ? true : false;
 		enemies = [];
 		bossInfo = [];
@@ -1088,7 +1088,7 @@ module.exports = function TerableLockons(mod){
     }
     function sortDistNpc(){
         for (let i = 0; i < npcInfo.length; i++){ // calculate distance
-            npcInfo[i].dist = npcInfo[i].loc.dist3D(playerLocation.loc) / 25;
+            npcInfo[i].dist = npcInfo[i].loc ? npcInfo[i].loc.dist3D(playerLocation.loc) / 25 : 99;
             //npcInfo[i].dist = (Math.sqrt(Math.pow(npcInfo[i].loc.x - playerLocation.loc.x, 2) + Math.pow(npcInfo[i].loc.y - playerLocation.loc.y, 2) + Math.pow(npcInfo[i].loc.z - playerLocation.loc.z, 2))) / 25;
 			//if(!npcInfo[i].dist) npcInfo[i].dist = 99;
         }
@@ -1098,7 +1098,7 @@ module.exports = function TerableLockons(mod){
     }
 	function sortDistEnemies(){
 		for (let i = 0; i < enemies.length; i++){ // calculate distance
-			enemies[i].dist = enemies[i].loc.dist3D(playerLocation.loc) / 25;
+			enemies[i].dist = enemies[i].loc ? enemies[i].loc.dist3D(playerLocation.loc) / 25 : 99;
 			//enemies[i].dist = (Math.sqrt(Math.pow(enemies[i].loc.x - playerLocation.loc.x, 2) + Math.pow(enemies[i].loc.y - playerLocation.loc.y, 2) + Math.pow(enemies[i].loc.z - playerLocation.loc.z, 2))) / 25;
 			//if(!enemies[i].dist) enemies[i].dist = 99;
 		}
