@@ -487,7 +487,7 @@ module.exports = function TerableLockons(mod){
 		npcInfo = [];
     });
 	
-    mod.hook('S_PARTY_MEMBER_LIST', 7, (event) => {
+    mod.hook('S_PARTY_MEMBER_LIST', 9, (event) => {
 		let addedMember = (event.members.length -1 > partyMembers.length) ? true : false;
         // refresh locations of existing party members
         for (let i = 0; i < event.members.length; i++){
@@ -561,7 +561,7 @@ module.exports = function TerableLockons(mod){
 		enemies.push(tempPushEvent);
 	}
 	
-    mod.hook('S_SPAWN_USER', 15, (event) => {
+    mod.hook('S_SPAWN_USER', 16, (event) => {
 		for (let i = 0; i < partyMembers.length; i++){
 			if(partyMembers[i].gameId == event.gameId){
 				partyMembers[i].serverId = event.serverId;
@@ -614,7 +614,7 @@ module.exports = function TerableLockons(mod){
 		}
     });
     
-    mod.hook('S_USER_LOCATION', 5, (event) => {
+    mod.hook('S_USER_LOCATION', 6, (event) => {
         for (let i = 0; i < partyMembers.length; i++){
             if(partyMembers[i].gameId == (event.gameId)){
                 partyMembers[i].loc = event.loc;
@@ -684,7 +684,7 @@ module.exports = function TerableLockons(mod){
         }
     });
     
-    mod.hook('S_PARTY_MEMBER_STAT_UPDATE', 3, (event) => {
+    mod.hook('S_PARTY_MEMBER_STAT_UPDATE', 4, (event) => {
         if(playerId == event.playerId) return; // if me, return 
         for (let i = 0; i < partyMembers.length; i++){
             if(partyMembers[i].playerId === event.playerId){
@@ -752,7 +752,7 @@ module.exports = function TerableLockons(mod){
         }
     });    
     
-	mod.hook('S_SPAWN_NPC', 11, { order: -10 }, (event) => {
+	mod.hook('S_SPAWN_NPC', 12, { order: -10 }, (event) => {
 		if(event.villager) return;
         let tempPushEvent = {
             gameId: event.gameId,
