@@ -1,5 +1,7 @@
 # TerableLockons
 
+NOT updated for Menma's Tera
+
 Made by TerableCoder
 
 Tera-proxy module that skips lockons and instantly heals/cleanses party members or attacks/debuffs bams/npcs/enemy players. 
